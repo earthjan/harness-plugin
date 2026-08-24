@@ -146,13 +146,13 @@ Spawn all in parallel. **Persist before merge:** immediately after each reviewer
 On iteration ≥ 2, hand each reviewer the prior iteration's raw output file and `REVIEWS/FINDINGS.md` so it can (a) verify claimed fixes — a `FIXED` item that is not actually fixed must be re-reported as `OPEN` — and (b) avoid re-reporting genuinely resolved items.
 
 ```
-Agent({subagent_type: "tech-lead-review-architecture-enforcer", description: "Review staged changes (git diff --cached) for layer model, non-negotiable boundaries, and data-model integrity violations (e.g. Firestore rules, if this project uses Firestore). Verify prior fixes in REVIEWS/FINDINGS.md."})
+Agent({subagent_type: "harness-plugin:tech-lead-review-architecture-enforcer", description: "Review staged changes (git diff --cached) for layer model, non-negotiable boundaries, and data-model integrity violations (e.g. Firestore rules, if this project uses Firestore). Verify prior fixes in REVIEWS/FINDINGS.md."})
 
-Agent({subagent_type: "tech-lead-review-code-quality", description: "Review staged changes (git diff --cached) for coding guideline violations — 20-line cap, CQS, cohesion, comments, dead code. Verify prior fixes in REVIEWS/FINDINGS.md."})
+Agent({subagent_type: "harness-plugin:tech-lead-review-code-quality", description: "Review staged changes (git diff --cached) for coding guideline violations — 20-line cap, CQS, cohesion, comments, dead code. Verify prior fixes in REVIEWS/FINDINGS.md."})
 
-Agent({subagent_type: "tech-lead-review-patterns", description: "Review staged changes (git diff --cached) for domain language, helpers/utils, OOP, copy objects, and component extraction violations. Verify prior fixes in REVIEWS/FINDINGS.md."})
+Agent({subagent_type: "harness-plugin:tech-lead-review-patterns", description: "Review staged changes (git diff --cached) for domain language, helpers/utils, OOP, copy objects, and component extraction violations. Verify prior fixes in REVIEWS/FINDINGS.md."})
 
-Agent({subagent_type: "tech-lead-review-tests", description: "Review staged changes (git diff --cached) for test placement, coverage, assertion quality, and TDD anti-patterns. Verify prior fixes in REVIEWS/FINDINGS.md."})
+Agent({subagent_type: "harness-plugin:tech-lead-review-tests", description: "Review staged changes (git diff --cached) for test placement, coverage, assertion quality, and TDD anti-patterns. Verify prior fixes in REVIEWS/FINDINGS.md."})
 ```
 
 **Finding block format** (use for every finding in the per-agent file and in the ledger):
@@ -217,7 +217,7 @@ LOOP:
 `goal-satisfaction-reviewer` pins `model: haiku` in its own frontmatter (checklist against PLAN-NONUI.md's acceptance criteria). Same escalation rule as the reviewers above — default haiku, escalate to `model: "sonnet"` per-invocation only when this ticket's acceptance criteria genuinely warrant it (high-stakes/ambiguous criteria), never past `sonnet`.
 
 ```
-Agent({subagent_type: "goal-satisfaction-reviewer", description: "Verifies that the delivered implementation satisfies the acceptance criteria in PLAN-NONUI.md"})
+Agent({subagent_type: "harness-plugin:goal-satisfaction-reviewer", description: "Verifies that the delivered implementation satisfies the acceptance criteria in PLAN-NONUI.md"})
 ```
 
 ### Acting on Findings
@@ -340,11 +340,11 @@ Keep `PLAN-NONUI.md`, `DELIVERY-NONUI.md`, `WALKTHROUGH-NONUI.md`, and the `REVI
 
 ## Standalone Invocation
 
-- `Agent({subagent_type: "tech-lead-review-architecture-enforcer"})` — review any branch/staged diff for layer model, boundaries, and data-model integrity
-- `Agent({subagent_type: "tech-lead-review-code-quality"})` — review any branch/staged diff for coding guideline violations
-- `Agent({subagent_type: "tech-lead-review-patterns"})` — review any branch/staged diff for domain language, patterns, and conventions
-- `Agent({subagent_type: "tech-lead-review-tests"})` — review any branch/staged diff for test placement, coverage, and assertion quality
-- `Agent({subagent_type: "goal-satisfaction-reviewer"})` — verify that delivered implementation satisfies acceptance criteria in PLAN-NONUI.md
+- `Agent({subagent_type: "harness-plugin:tech-lead-review-architecture-enforcer"})` — review any branch/staged diff for layer model, boundaries, and data-model integrity
+- `Agent({subagent_type: "harness-plugin:tech-lead-review-code-quality"})` — review any branch/staged diff for coding guideline violations
+- `Agent({subagent_type: "harness-plugin:tech-lead-review-patterns"})` — review any branch/staged diff for domain language, patterns, and conventions
+- `Agent({subagent_type: "harness-plugin:tech-lead-review-tests"})` — review any branch/staged diff for test placement, coverage, and assertion quality
+- `Agent({subagent_type: "harness-plugin:goal-satisfaction-reviewer"})` — verify that delivered implementation satisfies acceptance criteria in PLAN-NONUI.md
 
 ## Related
 

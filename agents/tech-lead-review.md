@@ -62,12 +62,14 @@ Launch all 4 sub-agents simultaneously using the Task tool. Each receives:
 
 **Each sub-agent reads its own docs** from the provided list — they have fresh context and can read the docs directly. Do NOT inline doc content in the dispatch prompt; pass the file paths and let each sub-agent read them.
 
-| Agent | Focus | Agent file |
+| Agent | Focus | subagent_type |
 |---|---|---|
-| **Architecture Enforcer** | Layer model, non-negotiable boundaries, data-model integrity, isolated/zero-dependency packages, server-only modules, data flow direction | `.claude/agents/tech-lead-review-architecture-enforcer.md` |
-| **Code Quality Reviewer** | Coding guideline checklist (body-size cap, CQS, cohesion, comments, dead code, types, duplication, string extraction) | `.claude/agents/tech-lead-review-code-quality.md` |
-| **Pattern Reviewer** | Domain language, code-placement conventions, OOP conventions, copy/string extraction, dependency injection, component extraction gate, shared component wrappers | `.claude/agents/tech-lead-review-patterns.md` |
-| **Test Reviewer** | Test co-location, coverage checks, assertion quality, TDD anti-patterns, mocking boundaries | `.claude/agents/tech-lead-review-tests.md` |
+| **Architecture Enforcer** | Layer model, non-negotiable boundaries, data-model integrity, isolated/zero-dependency packages, server-only modules, data flow direction | `harness-plugin:tech-lead-review-architecture-enforcer` |
+| **Code Quality Reviewer** | Coding guideline checklist (body-size cap, CQS, cohesion, comments, dead code, types, duplication, string extraction) | `harness-plugin:tech-lead-review-code-quality` |
+| **Pattern Reviewer** | Domain language, code-placement conventions, OOP conventions, copy/string extraction, dependency injection, component extraction gate, shared component wrappers | `harness-plugin:tech-lead-review-patterns` |
+| **Test Reviewer** | Test co-location, coverage checks, assertion quality, TDD anti-patterns, mocking boundaries | `harness-plugin:tech-lead-review-tests` |
+
+These agents ship as part of this plugin — `subagent_type` must carry the `harness-plugin:` prefix; the bare name (e.g. `tech-lead-review-architecture-enforcer`) does not resolve for a plugin-provided agent and the Agent tool call will error "Agent type not found."
 
 #### Dispatch prompt template
 
@@ -93,7 +95,7 @@ Return findings in this structured format for each:
 - teaching: (optional) 2-3 sentence explanation
 ```
 
-**Important:** Launch all 4 sub-agents in a single message for maximum parallelism. Each gets its own subagent_type based on the agent file.
+**Important:** Launch all 4 sub-agents in a single message for maximum parallelism, using the `subagent_type` values from the table above.
 
 ### 5. Synthesize findings
 

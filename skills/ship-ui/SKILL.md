@@ -185,15 +185,15 @@ Spawn all in parallel (they audit independent concerns). **Persist before merge:
 On iteration ≥ 2, hand each reviewer the prior iteration's raw output file and `REVIEWS/FINDINGS.md` so it can (a) verify claimed fixes — a `FIXED` item that is not actually fixed must be re-reported as `OPEN` — and (b) avoid re-reporting genuinely resolved items.
 
 ```
-Agent({subagent_type: "ux-reviewer", description: "Audit UX copy, tone, and visual design on staged changes. Verify prior fixes in REVIEWS/FINDINGS.md; re-report any claimed-fixed item that is not actually fixed. Additionally check DESIGN.md compliance against whatever spacing/type/token sections this project's own DESIGN.md (or equivalent design-system doc) actually defines: (1) every spacing value maps to a named spacing role/token, not an off-scale number — flag any that don't; (2) type sizes and component dimensions use the project's own type-scale/token definitions at every fidelity level, not placeholder numbers; (3) every list-row-shaped element has an explicit reflow strategy per whatever reflow rule the project's design doc specifies, with evidence (screenshots) it was checked at more than one width per browser-verify's multi-width mandate, not just the target device. If PLAN.md has a Mock Element Inventory, walk that inventory row by row against the diff and the browser-verify evidence and report any row that is missing, unwired, or unverified — 'matches the wireframe' is not an acceptable claim, cite the specific row. (lista-natin's own history is the reason this inventory-walk step exists: an underspecified plan let a dead tap-handler, a missing chip icon, and a collapsed card gap all ship past a correct wireframe — watch for the equivalent gap here.)"})
+Agent({subagent_type: "harness-plugin:ux-reviewer", description: "Audit UX copy, tone, and visual design on staged changes. Verify prior fixes in REVIEWS/FINDINGS.md; re-report any claimed-fixed item that is not actually fixed. Additionally check DESIGN.md compliance against whatever spacing/type/token sections this project's own DESIGN.md (or equivalent design-system doc) actually defines: (1) every spacing value maps to a named spacing role/token, not an off-scale number — flag any that don't; (2) type sizes and component dimensions use the project's own type-scale/token definitions at every fidelity level, not placeholder numbers; (3) every list-row-shaped element has an explicit reflow strategy per whatever reflow rule the project's design doc specifies, with evidence (screenshots) it was checked at more than one width per browser-verify's multi-width mandate, not just the target device. If PLAN.md has a Mock Element Inventory, walk that inventory row by row against the diff and the browser-verify evidence and report any row that is missing, unwired, or unverified — 'matches the wireframe' is not an acceptable claim, cite the specific row. (lista-natin's own history is the reason this inventory-walk step exists: an underspecified plan let a dead tap-handler, a missing chip icon, and a collapsed card gap all ship past a correct wireframe — watch for the equivalent gap here.)"})
 
-Agent({subagent_type: "tech-lead-review-architecture-enforcer", description: "Review staged changes (git diff --cached) for layer model, non-negotiable boundaries, and data-model integrity violations (e.g. Firestore rules, if this project uses Firestore). Verify prior fixes in REVIEWS/FINDINGS.md."})
+Agent({subagent_type: "harness-plugin:tech-lead-review-architecture-enforcer", description: "Review staged changes (git diff --cached) for layer model, non-negotiable boundaries, and data-model integrity violations (e.g. Firestore rules, if this project uses Firestore). Verify prior fixes in REVIEWS/FINDINGS.md."})
 
-Agent({subagent_type: "tech-lead-review-code-quality", description: "Review staged changes (git diff --cached) for coding guideline violations — 20-line cap, CQS, cohesion, comments, dead code. Verify prior fixes in REVIEWS/FINDINGS.md."})
+Agent({subagent_type: "harness-plugin:tech-lead-review-code-quality", description: "Review staged changes (git diff --cached) for coding guideline violations — 20-line cap, CQS, cohesion, comments, dead code. Verify prior fixes in REVIEWS/FINDINGS.md."})
 
-Agent({subagent_type: "tech-lead-review-patterns", description: "Review staged changes (git diff --cached) for domain language, helpers/utils, OOP, copy objects, and component extraction violations. Verify prior fixes in REVIEWS/FINDINGS.md."})
+Agent({subagent_type: "harness-plugin:tech-lead-review-patterns", description: "Review staged changes (git diff --cached) for domain language, helpers/utils, OOP, copy objects, and component extraction violations. Verify prior fixes in REVIEWS/FINDINGS.md."})
 
-Agent({subagent_type: "tech-lead-review-tests", description: "Review staged changes (git diff --cached) for test placement, coverage, assertion quality, and TDD anti-patterns. Verify prior fixes in REVIEWS/FINDINGS.md."})
+Agent({subagent_type: "harness-plugin:tech-lead-review-tests", description: "Review staged changes (git diff --cached) for test placement, coverage, assertion quality, and TDD anti-patterns. Verify prior fixes in REVIEWS/FINDINGS.md."})
 ```
 
 **Finding block format** (use for every finding in the per-agent file and in the ledger):
@@ -258,7 +258,7 @@ LOOP:
 `goal-satisfaction-reviewer` pins `model: haiku` in its own frontmatter (checklist against PLAN.md's acceptance criteria). Same escalation rule as the reviewers above — default haiku, escalate to `model: "sonnet"` per-invocation only when this ticket's acceptance criteria genuinely warrant it (high-stakes/ambiguous criteria), never past `sonnet`.
 
 ```
-Agent({subagent_type: "goal-satisfaction-reviewer", description: "Verifies that the delivered implementation satisfies the acceptance criteria in PLAN.md"})
+Agent({subagent_type: "harness-plugin:goal-satisfaction-reviewer", description: "Verifies that the delivered implementation satisfies the acceptance criteria in PLAN.md"})
 ```
 
 ### Acting on Findings
@@ -383,12 +383,12 @@ Keep `PLAN.md`, `DELIVERY.md`, `WALKTHROUGH.md`, and the `REVIEWS/` directory (p
 
 All reviewers are invocable directly outside this pipeline:
 
-- `Agent({subagent_type: "ux-reviewer"})` — audit any user-facing artifact (copy, design, tone)
-- `Agent({subagent_type: "tech-lead-review-architecture-enforcer"})` — review any branch/staged diff for layer model, boundaries, and data-model integrity
-- `Agent({subagent_type: "tech-lead-review-code-quality"})` — review any branch/staged diff for coding guideline violations
-- `Agent({subagent_type: "tech-lead-review-patterns"})` — review any branch/staged diff for domain language, patterns, and conventions
-- `Agent({subagent_type: "tech-lead-review-tests"})` — review any branch/staged diff for test placement, coverage, and assertion quality
-- `Agent({subagent_type: "goal-satisfaction-reviewer"})` — verify that delivered implementation satisfies acceptance criteria in PLAN.md
+- `Agent({subagent_type: "harness-plugin:ux-reviewer"})` — audit any user-facing artifact (copy, design, tone)
+- `Agent({subagent_type: "harness-plugin:tech-lead-review-architecture-enforcer"})` — review any branch/staged diff for layer model, boundaries, and data-model integrity
+- `Agent({subagent_type: "harness-plugin:tech-lead-review-code-quality"})` — review any branch/staged diff for coding guideline violations
+- `Agent({subagent_type: "harness-plugin:tech-lead-review-patterns"})` — review any branch/staged diff for domain language, patterns, and conventions
+- `Agent({subagent_type: "harness-plugin:tech-lead-review-tests"})` — review any branch/staged diff for test placement, coverage, and assertion quality
+- `Agent({subagent_type: "harness-plugin:goal-satisfaction-reviewer"})` — verify that delivered implementation satisfies acceptance criteria in PLAN.md
 
 ## Related
 

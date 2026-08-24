@@ -40,7 +40,7 @@ If the branch references a ticket (a `docs/tickets/<id>/` directory exists), con
 
 Spawn the review agent on the full diff, passing the ticket context from Step 1:
 ```
-Agent({subagent_type: "tech-lead-review", description: "Review branch diff against default branch. Ticket context: <title/description/state from docs/tickets/<id>/CONTEXT.md>"})
+Agent({subagent_type: "harness-plugin:tech-lead-review", description: "Review branch diff against default branch. Ticket context: <title/description/state from docs/tickets/<id>/CONTEXT.md>"})
 ```
 
 The agent loads all canonical docs, runs the rulebase, and produces the report. Wait for it to finish before proceeding.
@@ -115,7 +115,7 @@ List all nitpicks. Ask: "Apply nitpicks, skip, or pick individually?" Default: s
 
 After all fixes are applied, re-spawn the `tech-lead-review` agent on the updated diff:
 ```
-Agent({subagent_type: "tech-lead-review", description: "Re-review after fixes applied"})
+Agent({subagent_type: "harness-plugin:tech-lead-review", description: "Re-review after fixes applied"})
 ```
 
 Compare reports:

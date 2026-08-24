@@ -17,7 +17,7 @@ This is the manual entry point (`/tech-lead-review`) for the same coordinator lo
 2. If the branch references a ticket (a `docs/tickets/<id>/` directory exists), read `docs/tickets/INDEX.md` to locate it, then read only that ticket's `CONTEXT.md` frontmatter — don't read every file in the ticket dir.
 3. Spawn the `tech-lead-review` agent with the diff and any ticket context:
    ```
-   Agent({subagent_type: "tech-lead-review", description: "Review branch diff against default branch. Ticket context: <title/description/state, if any>"})
+   Agent({subagent_type: "harness-plugin:tech-lead-review", description: "Review branch diff against default branch. Ticket context: <title/description/state, if any>"})
    ```
    The agent handles everything else: discovering this project's own doc list from its `CLAUDE.md`, dispatching the 4 specialized sub-agents, reading gate commands from `.claude/harness.config.json`, synthesizing findings, and rendering the report. See `agents/tech-lead-review.md` for that full flow — it's the single source of truth for the coordinator's behavior.
 4. Present the agent's report to the user as-is. Don't re-review or second-guess it.
