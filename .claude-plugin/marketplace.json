@@ -1,0 +1,11 @@
+{
+  "name": "earthjan-harness",
+  "owner": { "name": "Earth Jan Baquir Marzan" },
+  "plugins": [
+    {
+      "name": "harness-plugin",
+      "source": "./",
+      "description": "Reusable Claude Code harness (skills, agents, hooks, ticket registry) — source of truth is lista-natin."
+    }
+  ]
+}

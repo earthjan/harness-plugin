@@ -1,0 +1,92 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code when working with code in this repository.
+<!-- Generated from harness-plugin's CLAUDE.md.template. The PROCESS sections below (TDD
+     law, acceptance gates, ticket registry) are the harness's source-of-truth practice —
+     don't rewrite their substance per project, only the commands/paths they point at.
+     The DOMAIN sections ({{...}} placeholders) are this project's own and won't match
+     any other project. -->
+
+## Critical Documentation to Load First
+
+Before making any change, read these docs in order:
+
+1. [README.md](./README.md) — navigation and project overview
+2. {{DOMAIN_CONTEXT_DOC}} — domain language and scope <!-- e.g. docs/product-definition/CONTEXT.md -->
+3. {{MODULE_CONTEXT_DOCS}} <!-- relevant module CONTEXT.md files, if the project has a modules/ split -->
+4. {{DATA_MODEL_DOC}} — canonical data model and integrity rules, if one exists
+5. {{ARCHITECTURE_DOCS}} — layer responsibilities and placement rules
+6. {{DESIGN_DOC}} — visual/design system, if this project has a UI
+7. [docs/tickets/INDEX.md](./docs/tickets/INDEX.md) — ticket knowledge registry. **Consult when your task involves a ticket** (see [Ticket Registry](#ticket-registry-harness) below)
+
+When documentation conflicts, canonical docs under `docs/*/CONTEXT.md` take highest precedence, then ADRs, then this file.
+
+## Fundamental Authoring Practice — TDD (Red → Green)
+
+<!-- PROCESS — keep as-is; this is the harness's non-negotiable law, not a per-project choice. -->
+This is the **primary, non-negotiable authoring practice** for every feature and bugfix. It is not one option among many. The full reference is at [.claude/skills/tdd/SKILL.md](./.claude/skills/tdd/SKILL.md) (from the harness-plugin) — these are the standing rules applied on every change.
+
+**No test, no code.** No feature or bugfix is implemented without a failing test authored first at a confirmed seam. This law has no exceptions and overrides all other practices in this file.
+
+### The Loop
+
+1. **Red** — write a failing test first. No test, no code.
+2. **Green** — write only enough code to pass the test. No anticipating future tests, no speculative features.
+3. **Repeat** — one seam, one test, one minimal implementation per cycle.
+
+### Seams — Confirm Before Writing
+
+A **seam** is the public boundary you test at. Before writing any test, identify which seams are under test and confirm them with the user.
+
+## Acceptance Criteria (All Changes)
+
+**After any code change — no exceptions — these must pass with zero errors:**
+
+```bash
+{{TYPECHECK_COMMAND}}   <!-- e.g. npm run tsc -->
+{{LINT_COMMAND}}        <!-- e.g. npm run lint -->
+{{TEST_COMMAND}}        <!-- e.g. npm test — full suite, unfiltered -->
+```
+
+Run all of them before considering the change complete. Fix any failures before handing off.
+
+**The test gate is the full suite, run in full.** A filtered/partial run does not satisfy this requirement even if it passes.
+
+Configure the exact commands and TDD-gated source dirs the harness hooks enforce in `.claude/harness.config.json` (see harness-plugin README) — the defaults assume `npm` and a `services/app-logic` / `services/core` layout, override them here if this project differs.
+
+## Commands
+
+```bash
+{{DEV_COMMAND}}         <!-- start dev / run -->
+{{TYPECHECK_COMMAND}}
+{{TEST_COMMAND}}
+{{LINT_COMMAND}}
+```
+
+## Architecture
+
+{{ARCHITECTURE_SUMMARY}}
+<!-- e.g. layer table, module list, non-negotiable boundaries. Pull this from
+     docs/system-architecture/CONTEXT.md and docs/project-structure/CONTEXT.md
+     if this project already has them; otherwise draft with the user. -->
+
+## Ticket Registry (Harness)
+
+<!-- PROCESS — keep as-is. -->
+Every ticket's accumulated knowledge lives in `docs/tickets/<id>/`, with `CONTEXT.md` as the single entry point.
+
+- **Locate:** read `docs/tickets/INDEX.md` — the auto-generated registry of every ticket.
+- **Enter:** read only that directory's `CONTEXT.md` **frontmatter** (`title`, `description`) before opening any other file inside it.
+- **Create/update:** every ticket `CONTEXT.md` carries frontmatter with at least `title` and `description`; optional `state`, `labels`, `repo`, `updated`.
+- **Maintenance:**
+  ```bash
+  node docs/tickets/update-tickets-index.mjs           # regenerate INDEX.md
+  node docs/tickets/update-tickets-index.mjs --check   # verify all tickets have valid frontmatter
+  node docs/tickets/update-tickets-index.mjs --init    # scaffold CONTEXT.md for ticket dirs that lack it
+  ```
+- Ticket dirs live only under `docs/tickets/` — do not create ticket directories directly under `docs/`.
+
+## Naming Conventions
+
+{{NAMING_CONVENTIONS}}
+<!-- type file suffixes, test file suffixes, describe()/it() conventions, etc. -->

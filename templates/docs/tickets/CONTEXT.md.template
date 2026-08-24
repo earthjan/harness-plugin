@@ -1,0 +1,23 @@
+---
+title: "{{TICKET_TITLE}}"
+description: "{{ONE_LINE_DESCRIPTION}}"
+state: not_started
+labels: []
+updated: "{{ISO_DATE}}"
+---
+
+<!-- Ticket knowledge entry point. Keep this file curated — link out to
+     PLAN.md, REVIEWS/, DELIVERY.md, WALKTHROUGH.md, etc. rather than
+     inlining everything here. -->
+
+## Summary
+
+{{SUMMARY}}
+
+## Key Decisions
+
+{{KEY_DECISIONS}}
+
+## Links
+
+{{LINKS}}

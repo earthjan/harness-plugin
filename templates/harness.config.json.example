@@ -1,0 +1,9 @@
+{
+  "gates": {
+    "typecheck": "npm run tsc",
+    "lint": "npm run lint",
+    "test": "npm test"
+  },
+  "tddGatedDirs": ["services/app-logic", "services/core"],
+  "ticketsIndexScript": "docs/tickets/update-tickets-index.mjs"
+}

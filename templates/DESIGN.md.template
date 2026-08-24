@@ -1,0 +1,27 @@
+# DESIGN.md
+
+<!-- Skeleton only — fill every section with THIS project's real values. Don't
+     copy another project's tokens; a different stack/brand needs its own. -->
+
+## Design System Base
+
+{{DESIGN_SYSTEM}} <!-- e.g. "Material Design 3 via React Native Paper", "Tailwind + shadcn/ui", "custom" -->
+
+## Color Tokens
+
+{{COLOR_TOKENS}} <!-- primary/secondary/surface/error tokens, light + dark if applicable -->
+
+## Typography
+
+{{TYPOGRAPHY_SCALE}}
+
+## Spacing & Layout
+
+{{SPACING_SCALE}}
+
+## Component Specifications
+
+<!-- One subsection per component this project has a documented spec for
+     (Button, Card, Input, etc.) — states, sizes, tokens used. -->
+
+{{COMPONENT_SPECS}}

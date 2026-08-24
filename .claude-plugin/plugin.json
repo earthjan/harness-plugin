@@ -1,0 +1,8 @@
+{
+  "name": "harness-plugin",
+  "description": "Reusable Claude Code harness: TDD/ship pipelines, tech-lead review agents, ticket registry, and gate hooks — extracted from lista-natin as the source-of-truth harness for other projects.",
+  "author": { "name": "Earth Jan Baquir Marzan" },
+  "skills": "./skills",
+  "agents": "./agents",
+  "hooks": "./hooks/hooks.json"
+}
