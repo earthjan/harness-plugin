@@ -26,7 +26,7 @@ use-case class, a thin CLI entrypoint + a testable command object, etc.). Read t
 
 ## Sources
 
-This guide codifies patterns observed in the codebase. The authoritative rules come from:
+This guide codifies patterns observed in lista-natin's own codebase, as one worked example — per the Applicability section above, treat these as illustrative doc names, not paths guaranteed to exist in the current project. This project's own authoritative rules come from whatever its own `CLAUDE.md` links; lista-natin's own equivalents are:
 
 - `CLAUDE.md` — layer model, non-negotiable boundaries
 - `docs/project-structure/CONTEXT.md` — placement decision table, folder responsibilities

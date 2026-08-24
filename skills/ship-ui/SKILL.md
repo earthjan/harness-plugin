@@ -36,10 +36,11 @@ Resolve this once at the start of Phase 1 and reuse it for every artifact below 
 **Mock Element Inventory** (required whenever a wireframe/mock HTML file exists for this delivery —
 skip this subsection only when there is no such file):
 
-`docs/tickets/103/0001_iteration` and `0002_iteration` shipped past a wireframe that was already
-correct — a dead row-tap handler, a missing status-chip icon, a collapsed `marginBottom: 0` between
-cards, an overflowing member row — because the plan's ACs were written at "view structure" grain
-instead of walking the mock element-by-element. A coarse AC lets a coarse gap through
+In lista-natin's own history (`docs/tickets/103/0001_iteration` and `0002_iteration`), a delivery
+shipped past a wireframe that was already correct — a dead row-tap handler, a missing status-chip
+icon, a collapsed `marginBottom: 0` between cards, an overflowing member row — because the plan's
+ACs were written at "view structure" grain instead of walking the mock element-by-element. A coarse
+AC lets a coarse gap through
 `goal-satisfaction-reviewer`, which only checks the diff against whatever ACs exist here.
 
 Before writing any other PLAN.md section, walk the mock top to bottom and list every distinct element
@@ -108,8 +109,11 @@ between deliveries that individually looked fine.
    hook/component/query/service with consumers outside the screen(s) it built or modified? A single
    grep pass is not sufficient — walk the import graph: grep for importers of the changed file(s),
    then grep for importers of *those* files, repeating until a `pages/`/`app/` route file is
-   reached, the trail dead-ends, or a fixed hop budget of 4 layers is spent (covers this repo's
-   deepest documented layer chain, `api/` → `query/` → `services/app-logic/` → `pages/`). "Files
+   reached, the trail dead-ends, or a fixed hop budget is spent — size the budget to this
+   project's own deepest documented layer chain (read its architecture doc; lista-natin's own
+   chain is 4 hops, `api/` → `query/` → `services/app-logic/` → `pages/`, shown here as one
+   illustration — a project with a deeper chain needs a higher budget, or the walk can stop short
+   of a real consumer and understate blast radius). "Files
    this delivery created or modified" — the exclusion set for this walk — is the `git status
    --porcelain` output at this point in the pipeline (Phase 2.5 runs before Phase 3's `git add`, so
    there's no staged diff yet).
@@ -181,9 +185,9 @@ Spawn all in parallel (they audit independent concerns). **Persist before merge:
 On iteration ≥ 2, hand each reviewer the prior iteration's raw output file and `REVIEWS/FINDINGS.md` so it can (a) verify claimed fixes — a `FIXED` item that is not actually fixed must be re-reported as `OPEN` — and (b) avoid re-reporting genuinely resolved items.
 
 ```
-Agent({subagent_type: "ux-reviewer", description: "Audit UX copy, tone, and visual design on staged changes. Verify prior fixes in REVIEWS/FINDINGS.md; re-report any claimed-fixed item that is not actually fixed. Additionally check DESIGN.md compliance per docs/agent-learning-logs.md (2026-08-21, Ticket 102): (1) every spacing value maps to a named §2 role (4/8/16/24/32/40/48dp), not an off-scale number — flag any that don't; (2) type sizes and component dimensions use §4/§9/§10/§11 tokens at every fidelity level, not placeholder numbers; (3) every list-row-shaped element has an explicit reflow strategy per §24 and evidence (screenshots) it was checked at both the target width and the 344dp Z Fold cover-screen width per browser-verify's two-width mandate, not just the target device. If PLAN.md has a Mock Element Inventory (per docs/tickets/103/0001_iteration, 0002_iteration — dead taps, a missing chip icon, and a collapsed card gap all shipped past a correct wireframe), walk that inventory row by row against the diff and the browser-verify evidence and report any row that is missing, unwired, or unverified — 'matches the wireframe' is not an acceptable claim, cite the specific row."})
+Agent({subagent_type: "ux-reviewer", description: "Audit UX copy, tone, and visual design on staged changes. Verify prior fixes in REVIEWS/FINDINGS.md; re-report any claimed-fixed item that is not actually fixed. Additionally check DESIGN.md compliance against whatever spacing/type/token sections this project's own DESIGN.md (or equivalent design-system doc) actually defines: (1) every spacing value maps to a named spacing role/token, not an off-scale number — flag any that don't; (2) type sizes and component dimensions use the project's own type-scale/token definitions at every fidelity level, not placeholder numbers; (3) every list-row-shaped element has an explicit reflow strategy per whatever reflow rule the project's design doc specifies, with evidence (screenshots) it was checked at more than one width per browser-verify's multi-width mandate, not just the target device. If PLAN.md has a Mock Element Inventory, walk that inventory row by row against the diff and the browser-verify evidence and report any row that is missing, unwired, or unverified — 'matches the wireframe' is not an acceptable claim, cite the specific row. (lista-natin's own history is the reason this inventory-walk step exists: an underspecified plan let a dead tap-handler, a missing chip icon, and a collapsed card gap all ship past a correct wireframe — watch for the equivalent gap here.)"})
 
-Agent({subagent_type: "tech-lead-review-architecture-enforcer", description: "Review staged changes (git diff --cached) for layer model, non-negotiable boundaries, and Firestore integrity violations. Verify prior fixes in REVIEWS/FINDINGS.md."})
+Agent({subagent_type: "tech-lead-review-architecture-enforcer", description: "Review staged changes (git diff --cached) for layer model, non-negotiable boundaries, and data-model integrity violations (e.g. Firestore rules, if this project uses Firestore). Verify prior fixes in REVIEWS/FINDINGS.md."})
 
 Agent({subagent_type: "tech-lead-review-code-quality", description: "Review staged changes (git diff --cached) for coding guideline violations — 20-line cap, CQS, cohesion, comments, dead code. Verify prior fixes in REVIEWS/FINDINGS.md."})
 
@@ -380,7 +384,7 @@ Keep `PLAN.md`, `DELIVERY.md`, `WALKTHROUGH.md`, and the `REVIEWS/` directory (p
 All reviewers are invocable directly outside this pipeline:
 
 - `Agent({subagent_type: "ux-reviewer"})` — audit any user-facing artifact (copy, design, tone)
-- `Agent({subagent_type: "tech-lead-review-architecture-enforcer"})` — review any branch/staged diff for layer model, boundaries, and Firestore integrity
+- `Agent({subagent_type: "tech-lead-review-architecture-enforcer"})` — review any branch/staged diff for layer model, boundaries, and data-model integrity
 - `Agent({subagent_type: "tech-lead-review-code-quality"})` — review any branch/staged diff for coding guideline violations
 - `Agent({subagent_type: "tech-lead-review-patterns"})` — review any branch/staged diff for domain language, patterns, and conventions
 - `Agent({subagent_type: "tech-lead-review-tests"})` — review any branch/staged diff for test placement, coverage, and assertion quality

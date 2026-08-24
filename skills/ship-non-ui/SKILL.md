@@ -70,8 +70,11 @@ that individually looked fine.
    the screen, not the screen's own file. A single grep hop from there lands on the next layer up,
    not on a screen. Walk the import graph instead: grep for importers of the changed file(s), then
    grep for importers of *those* files, repeating until a `pages/`/`app/` route file is reached, the
-   trail dead-ends, or a fixed hop budget of 4 layers is spent (covers this repo's deepest
-   documented layer chain, `api/` → `query/` → `services/app-logic/` → `pages/`). "Files this
+   trail dead-ends, or a fixed hop budget is spent — size the budget to this project's own deepest
+   documented layer chain (read its architecture doc; lista-natin's own chain is 4 hops,
+   `api/` → `query/` → `services/app-logic/` → `pages/`, shown here as one illustration — a project
+   with a deeper chain needs a higher budget, or the walk can stop short of a real consumer and
+   understate blast radius). "Files this
    delivery created or modified" — the exclusion set for this walk — is the `git status
    --porcelain` output at this point in the pipeline (Phase 2.5 runs before Phase 3's `git add`).
 2. **No UI-facing consumer found** (a Cloud Function, a Firestore rule, backend logic with nothing
@@ -143,7 +146,7 @@ Spawn all in parallel. **Persist before merge:** immediately after each reviewer
 On iteration ≥ 2, hand each reviewer the prior iteration's raw output file and `REVIEWS/FINDINGS.md` so it can (a) verify claimed fixes — a `FIXED` item that is not actually fixed must be re-reported as `OPEN` — and (b) avoid re-reporting genuinely resolved items.
 
 ```
-Agent({subagent_type: "tech-lead-review-architecture-enforcer", description: "Review staged changes (git diff --cached) for layer model, non-negotiable boundaries, and Firestore integrity violations. Verify prior fixes in REVIEWS/FINDINGS.md."})
+Agent({subagent_type: "tech-lead-review-architecture-enforcer", description: "Review staged changes (git diff --cached) for layer model, non-negotiable boundaries, and data-model integrity violations (e.g. Firestore rules, if this project uses Firestore). Verify prior fixes in REVIEWS/FINDINGS.md."})
 
 Agent({subagent_type: "tech-lead-review-code-quality", description: "Review staged changes (git diff --cached) for coding guideline violations — 20-line cap, CQS, cohesion, comments, dead code. Verify prior fixes in REVIEWS/FINDINGS.md."})
 
@@ -337,7 +340,7 @@ Keep `PLAN-NONUI.md`, `DELIVERY-NONUI.md`, `WALKTHROUGH-NONUI.md`, and the `REVI
 
 ## Standalone Invocation
 
-- `Agent({subagent_type: "tech-lead-review-architecture-enforcer"})` — review any branch/staged diff for layer model, boundaries, and Firestore integrity
+- `Agent({subagent_type: "tech-lead-review-architecture-enforcer"})` — review any branch/staged diff for layer model, boundaries, and data-model integrity
 - `Agent({subagent_type: "tech-lead-review-code-quality"})` — review any branch/staged diff for coding guideline violations
 - `Agent({subagent_type: "tech-lead-review-patterns"})` — review any branch/staged diff for domain language, patterns, and conventions
 - `Agent({subagent_type: "tech-lead-review-tests"})` — review any branch/staged diff for test placement, coverage, and assertion quality
