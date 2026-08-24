@@ -224,9 +224,11 @@ Triggered by a genuine `FAIL` — one `TEST-PLAN.md` did not already predict as 
    time (proceed with 🔴/🟡, skip 🔵). If it flags a finding as genuinely ambiguous, don't guess —
    record it in the `RESULTS.md` row's note as unresolved and fall through to the fix-attempt-cap
    handling above.
-6. Run `npm run tsc && npm run lint && npm test` — **full suite, unfiltered** — and confirm zero
-   errors. This is separate and mandatory; `tech-lead-review-with-fix` doesn't run the full suite
-   (only `npx jest <touched-file>` on files it edits).
+6. Run the project's three gate commands — **full suite, unfiltered** — and confirm zero errors.
+   Read them from `.claude/harness.config.json`'s `gates.typecheck`/`gates.lint`/`gates.test`; fall
+   back to `npm run tsc && npm run lint && npm test` only when that config file doesn't exist. This
+   is separate and mandatory; `tech-lead-review-with-fix` doesn't run the full suite (only the
+   project's test command against each file it edits).
 7. Regression: re-run the scenario that failed, plus anything `TEST-PLAN.md` marks as depending on
    that ticket/screen, and confirm they now read `PASS`. Same dispatch format as Phase 2 step 5.
 8. Update the `RESULTS.md` row(s) — prefix the note with `FIXED:`, append rather than overwrite so

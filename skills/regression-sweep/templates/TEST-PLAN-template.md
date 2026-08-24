@@ -1,12 +1,20 @@
 # Regression Sweep Test Plan — <date> (tickets: <id, id, id, ...>)
 
+<!-- ADAPT BEFORE USE: this template's worked example throughout (§1 pre-flight, the narrow-width
+     re-check below, the frontend-testing-runbook reference) is lista-natin's own values — a
+     Firebase emulator, an Expo dev server, an Expo/RN app. Fill every {{PLACEHOLDER}} with this
+     project's own dev-server/seed/auth/viewport facts before running this plan for real. -->
+
 **Read each covered ticket's `CONTEXT.md` first.** Every claim in this plan (what's stubbed, what's
 a known gap, what shipped vs. what the ticket literally asked for) is sourced there or cited
 directly below — this file only adds the executable steps.
 
-**Audience:** an autonomous agent driving `agent-browser` against the Firebase emulator + seeder,
-following `docs/how-to-fe-test/CONTEXT.md`. This is a runbook, not a narrative — follow it in
-order, record results as you go, don't skip the pre-flight.
+**Audience:** an autonomous agent driving `agent-browser` against {{DEV_BACKEND_DESCRIPTION}}
+<!-- e.g. "the Firebase emulator + seeder" -->, following {{FRONTEND_TEST_RUNBOOK_DOC}}
+<!-- this project's own frontend-testing runbook doc, if one exists (check for something like
+     docs/how-to-fe-test/CONTEXT.md or similar); omit this reference if no such doc exists -->.
+This is a runbook, not a narrative — follow it in order, record results as you go, don't skip the
+pre-flight.
 
 ---
 
@@ -14,7 +22,7 @@ order, record results as you go, don't skip the pre-flight.
 
 1. **Reseed immediately before this session**, not from a stale run. Every date-derived field
    (`isLate`, due dates, grace windows) is computed off real wall-clock time at seed time — see
-   `docs/how-to-fe-test/CONTEXT.md`.
+   {{FRONTEND_TEST_RUNBOOK_DOC}} <!-- if this project has one; otherwise this project's own seed data docs, if any --> .
 2. **Pull-to-refresh does nothing in this environment.** Wherever this plan says "refresh," it
    means: **navigate away to another screen, then navigate back.**
 3. Scenarios below marked **BLOCKED** cite the reason they cannot currently be observed (§4). Don't
@@ -37,19 +45,21 @@ order, record results as you go, don't skip the pre-flight.
 
 ```bash
 # Two isolated logins, phone viewport
-agent-browser open http://localhost:8081/login --session admin
+agent-browser open {{DEV_SERVER_BASE_URL}}/login --session admin <!-- e.g. http://localhost:8081 -->
 agent-browser set viewport {{VIEWPORT}} <!-- e.g. 412 914 -->
 # sign in as {{DEV_ACCOUNTS}} <!-- e.g. admin@dev.test / password -->
 
-agent-browser open http://localhost:8081/login --session participant
+agent-browser open {{DEV_SERVER_BASE_URL}}/login --session participant
 agent-browser set viewport {{VIEWPORT}} <!-- e.g. 412 914 -->
 # sign in as {{DEV_ACCOUNTS}} <!-- e.g. participant@dev.test / password -->
 ```
 
 Confirm `{{AUTH_SETUP_COMMAND}}` <!-- e.g. .env.local has EXPO_PUBLIC_ENABLE_DEV_EMAIL_AUTH=true --> before starting.
 
-Re-check any scenario flagged as a visual/layout issue at the narrower Z Fold width too
-(`agent-browser set viewport 344 882`) before concluding it's a real bug.
+Re-check any scenario flagged as a visual/layout issue at a second, narrower viewport too
+(`agent-browser set viewport {{NARROW_VIEWPORT}}` <!-- e.g. 344 882, lista-natin's Z Fold check -->)
+before concluding it's a real bug — skip this if this project doesn't target a foldable/narrow
+breakpoint.
 
 ## 2. Global conventions
 

@@ -1,6 +1,6 @@
 ---
 name: ux-builder
-description: Creates new screens or improves existing ones. Loads this project's UX copy guide and architecture docs. Use proactively for UI/UX implementation tasks — new screens, redesigns, copy improvements, or any user-facing React Native code.
+description: Creates new screens or improves existing ones. Loads this project's UX copy guide and architecture docs. Use proactively for UI/UX implementation tasks — new screens, redesigns, copy improvements, or any user-facing UI code.
 tools: Read, Grep, Glob, Bash, Edit, Write, WebFetch
 model: sonnet
 ---

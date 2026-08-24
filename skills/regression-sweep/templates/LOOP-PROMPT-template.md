@@ -102,14 +102,16 @@ Check: does `RESULTS.md` exist in this directory yet?
    - Run `tech-lead-review-with-fix` on the change. Treat its stated defaults as the answer every
      time in this unattended loop (proceed with 🔴/🟡, skip 🔵). A genuinely ambiguous finding →
      record unresolved in the `RESULTS.md` note, fall through to the fix-attempt-cap handling.
-   - **Run all three required gates, zero errors:**
+   - **Run all three required gates, zero errors** — read the commands from
+     `.claude/harness.config.json`'s `gates.typecheck`/`gates.lint`/`gates.test`; fall back to the
+     example below only when that config file doesn't exist:
      ```bash
      npm run tsc
      npm run lint
      npm test    # full suite, unfiltered
      ```
      A fix is not done until all three are clean. Separate from `tech-lead-review-with-fix`, which
-     only runs `npx jest <touched-file>`.
+     only runs the project's test command against the touched file.
    - Regression: re-run the failed scenario plus anything `TEST-PLAN.md` marks as depending on that
      ticket/screen, confirm they now read `PASS`. Same dispatch format as step 3.
    - Update the row(s): prefix the note `FIXED:`, append rather than overwrite (both rows keep the

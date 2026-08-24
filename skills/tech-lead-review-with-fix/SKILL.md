@@ -64,29 +64,32 @@ For each must-change finding, in order of appearance:
 
 If a fix needs clarification, flag it and move on — don't get stuck. Collect all ambiguous findings and ask the user once at the end.
 
+**Applicability:** the test-pattern-by-layer guidance below (React component/hook, service class, utility function) is one illustration — lista-natin's own stack (React/React Native + Jest + Testing Library). Before applying it, check this project's own `CLAUDE.md`/coding-guidelines for its actual test framework and layer conventions, and map the same principle (assert observable behavior through the public interface, mock only system boundaries) onto whatever that project's idiom is. For the test-runner invocation, use `.claude/harness.config.json`'s `gates.test` value if set (drop any `--no-coverage`-equivalent single-file flag the project's runner supports, to keep the check fast); fall back to `npx jest <test-file> --no-coverage` only when that config file doesn't exist and the project is in fact Jest-based.
+
 **When the finding is a missing test file (🔴 Must Change for coverage):**
 1. Read the source file to understand its public interface (exported functions, component props, class methods).
-2. Create `<SourceFileName>.test.ts` in the **same directory** as the source file (co-located, per CLAUDE.md naming conventions). Do NOT create a `__tests__/` subdirectory.
-3. Match the test pattern to the file's layer:
-   - **React component:** `render(<Component />)` with at least one `expect(screen.getByText(...) / getByTestId(...) / getByRole(...)).toBeInTheDocument()`. Provide required context providers (e.g., `AuthProvider`, `QueryClientProvider`) and mock system-boundary imports (Firebase, navigation).
-   - **React hook:** `renderHook(() => useHook(...), { wrapper })` from `@testing-library/react-native` + assert on `result.current`.
-   - **Service/API class:** `new Service(mockDeps).method(args)` + assert on return value. Mock only system-boundary deps (Firebase), not internal collaborators.
+2. Create `<SourceFileName>.test.ts` in the **same directory** as the source file (co-located, per this project's own naming conventions — check its `CLAUDE.md`). Do NOT create a `__tests__/` subdirectory unless that's what the project's own convention documents.
+3. Match the test pattern to the file's layer and this project's own stack — for example, in a React/React Native + Testing Library project:
+   - **React component:** `render(<Component />)` with at least one `expect(screen.getByText(...) / getByTestId(...) / getByRole(...)).toBeInTheDocument()`. Provide required context providers (e.g., an auth provider, a query-client provider) and mock system-boundary imports (the backend SDK, navigation).
+   - **React hook:** `renderHook(() => useHook(...), { wrapper })` + assert on `result.current`.
+   - **Service/API class:** `new Service(mockDeps).method(args)` + assert on return value. Mock only system-boundary deps, not internal collaborators.
    - **Utility function:** call with args + assert on return value.
+   In a different stack, apply the same shape (render/invoke the public interface, mock only system boundaries, assert observable output) using that stack's own testing library and conventions.
 4. Follow naming conventions: `describe(<exportedName>, ...)` and `it("should ...", ...)`.
 5. A test whose only assertions are `toHaveBeenCalled*` matchers — or a render smoke test with no observable-behavior claim — does **not** satisfy a coverage finding. Every new/updated test must assert observable behavior through the public interface.
-6. Run `npx jest <test-file> --no-coverage` to verify it passes before staging.
+6. Run the project's test command against just this file (see Applicability above) to verify it passes before staging.
 7. Stage with `git add <test-file>`.
 
 **When the finding is a mock-call-only test (🔴 Must Change):**
 1. Identify what observable behavior the test was meant to prove.
-2. Rewrite the assertion against observable output — return value, rendered output, or hook state transition — or move the test to the seam where that behavior is visible (see `.claude/skills/tdd/tests.md` "Wrong-seam tests").
+2. Rewrite the assertion against observable output — return value, rendered output, or hook/state transition — or move the test to the seam where that behavior is visible (see `.claude/skills/tdd/tests.md` "Wrong-seam tests").
 3. If the behavior is only visible through a side-effect dependency, assert the *outcome* of the side effect via a tracking double (e.g., `expect(deps._batch.writes).toEqual([...])`), not the invocation itself.
-4. Run `npx jest <test-file> --no-coverage` to verify before staging.
+4. Run the project's test command against just this file to verify before staging.
 
 **When the finding is a degenerate test (🔴 Must Change for coverage):**
 1. Read the existing test file to understand what it does (and doesn't) exercise.
 2. Replace `expect(true).toBe(true)` or empty test bodies with real assertions that exercise the production code's public interface.
-3. Run `npx jest <test-file> --no-coverage` to verify.
+3. Run the project's test command against just this file to verify.
 
 ### Step 5: Apply 🟡 Should Change Fixes
 
@@ -96,7 +99,7 @@ Same process as Step 4. If a should-change fix would be destructive or controver
 1. Read the existing test file alongside the diff to understand the current coverage.
 2. Add a new `it("should ...")` block that exercises the new/changed observable behavior through the public interface.
 3. Follow the same test-pattern-by-layer guidance as in Step 4. A `toHaveBeenCalled*`-only test or a render-only smoke test does not satisfy a changed-behavior finding — assert observable output.
-4. Run `npx jest <test-file> --no-coverage` to verify before staging.
+4. Run the project's test command against just this file (see Applicability above) to verify before staging.
 
 **When the finding is "no existing tests" on a changed file (🟡 Should Change):**
 1. This is an opportunity signal, not a mandatory fix. Present the finding to the user.
