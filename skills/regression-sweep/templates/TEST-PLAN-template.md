@@ -28,25 +28,25 @@ order, record results as you go, don't skip the pre-flight.
 ## 1. Pre-flight setup
 
 ```bash
-# Terminal 1 — start emulators, leave running
-npm run emulators
+# Terminal 1 — start the dev server, leave running
+{{DEV_SERVER_STARTUP_COMMAND}} <!-- e.g. npm run emulators -->
 
-# Terminal 2 — once emulators are up, seed fresh data
-npm run seed:emulator
+# Terminal 2 — once it's up, seed fresh data
+{{SEED_COMMAND}} <!-- e.g. npm run seed:emulator -->
 ```
 
 ```bash
 # Two isolated logins, phone viewport
 agent-browser open http://localhost:8081/login --session admin
-agent-browser set viewport 412 914
-# sign in as admin@dev.test / password
+agent-browser set viewport {{VIEWPORT}} <!-- e.g. 412 914 -->
+# sign in as {{DEV_ACCOUNTS}} <!-- e.g. admin@dev.test / password -->
 
 agent-browser open http://localhost:8081/login --session participant
-agent-browser set viewport 412 914
-# sign in as participant@dev.test / password
+agent-browser set viewport {{VIEWPORT}} <!-- e.g. 412 914 -->
+# sign in as {{DEV_ACCOUNTS}} <!-- e.g. participant@dev.test / password -->
 ```
 
-Confirm `.env.local` has `EXPO_PUBLIC_ENABLE_DEV_EMAIL_AUTH=true` before starting.
+Confirm `{{AUTH_SETUP_COMMAND}}` <!-- e.g. .env.local has EXPO_PUBLIC_ENABLE_DEV_EMAIL_AUTH=true --> before starting.
 
 Re-check any scenario flagged as a visual/layout issue at the narrower Z Fold width too
 (`agent-browser set viewport 344 882`) before concluding it's a real bug.

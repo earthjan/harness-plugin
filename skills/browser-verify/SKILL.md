@@ -1,6 +1,6 @@
 ---
 name: browser-verify
-description: Verify ListaNatin mobile UI in a real browser using agent-browser. Use when reviewing, dogfooding, or QA-ing any screen in this repo — verifying layouts/states with screenshots, logging into the app as a dev user, or checking the dev showcase. Wraps the external `agent-browser` skill (generic tool) with this repo's phone-viewport and dev-auth invariants.
+description: Verify ListaNatin mobile UI in a real browser using agent-browser. Use when reviewing, dogfooding, or QA-ing any screen in this repo — verifying layouts/states with screenshots, logging into the app as a dev user, or checking the dev showcase. Wraps the external `agent-browser` skill (generic tool) with this repo's phone-viewport and dev-auth invariants. NOTE: this skill is a project-specific wrapper — its dev-server URL, viewport, and dev-auth accounts belong to lista-natin. Before reusing it on a new project, swap those specifics for that project's own (see Applicability below).
 ---
 
 # Browser Verification (ListaNatin)
@@ -8,6 +8,24 @@ description: Verify ListaNatin mobile UI in a real browser using agent-browser. 
 This is the project's wrapper around the global `agent-browser` skill. Use `agent-browser` for the actual
 commands (it's the generic, version-matched tool — always load its core workflow first with
 `agent-browser skills get core`); this skill adds the **project invariants** that `agent-browser` cannot know.
+
+## Applicability — this skill is a project-specific wrapper
+
+Everything below (the phone viewport size, the dev-server URLs, the `/dev-showcase` route, and the
+`admin@dev.test`/`participant@dev.test` accounts) is **lista-natin's own configuration**, shown here as a
+worked example of what a project needs to fill in when wrapping `agent-browser` for itself — not a
+universal default. Before using this skill (or copying it) in a different project, replace:
+
+- the dev-server base URL and port (lista-natin's is Expo on `http://localhost:8081`),
+- the target viewport(s) (lista-natin targets Samsung Galaxy A51 at 412×914, checked narrow against a
+  344×882 Z Fold cover screen — a non-mobile project may need a completely different viewport strategy,
+  or none at all),
+- any project-specific routes (lista-natin's `/dev-showcase`),
+- and the dev-auth accounts/mechanism (lista-natin's `EXPO_PUBLIC_ENABLE_DEV_EMAIL_AUTH` + two seeded
+  Firebase Auth accounts) —
+
+with whatever the current project actually documents for local dev verification. Do not silently apply
+lista-natin's values to a different project's UI.
 
 ## Non-negotiable: phone viewport — at TWO widths
 

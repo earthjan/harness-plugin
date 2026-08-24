@@ -9,6 +9,21 @@ How to write `services/app-logic/` hooks so the high-value behavior is testable 
 
 > **Reference skill.** The canonical rules live in `docs/*/CONTEXT.md`, `CLAUDE.md`, and the `tdd` skill. In case of conflict, canonical docs take precedence.
 
+## Applicability
+
+The reusable idea here is general: split a **thin wire-up layer** (assembles real dependencies — API
+clients, external SDKs, framework hooks) from a **testable unit** (a core class, a pure function, or a
+DI'd sub-hook) that holds the actual behavior. That principle applies regardless of language or
+framework.
+
+The concrete code samples throughout this guide — React hooks, Firebase, TanStack Query, `expo-router`,
+`expo-haptics` — are **one illustration** of that principle, specific to React/React Native projects. If
+the current project isn't a React/React Native codebase, apply the same thin-wire-up + testable-unit
+principle in whatever this project's own idiom is (a thin controller/handler + a testable service or
+use-case class, a thin CLI entrypoint + a testable command object, etc.). Read the current project's own
+`CLAUDE.md` for its actual layer model and naming before mapping these patterns onto it — don't assume
+`services/app-logic/`, `services/core/`, or any of the folder names below exist in this project.
+
 ## Sources
 
 This guide codifies patterns observed in the codebase. The authoritative rules come from:

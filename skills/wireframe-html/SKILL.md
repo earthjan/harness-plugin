@@ -18,6 +18,25 @@ See `packages/wireframe-tokens/README.md` for the underlying mechanism.
    border-radius numbers into a wireframe, and never hand-paste the config
    either.**
 
+   **Before running the scaffold, confirm it exists in this project.** The commands below
+   (`npm run wireframe:scaffold`, `npm run wireframe:sync`) and `packages/wireframe-tokens/` are
+   lista-natin's own mechanism for locking a wireframe's Tailwind config to its real DESIGN.md
+   tokens. Check `package.json` for a `wireframe:scaffold` script (or equivalent) and for a
+   `packages/wireframe-tokens/` directory. If neither exists in the current project:
+
+   - **Say so explicitly** — do not silently skip the step or invent output as if the scaffold ran.
+   - Then either **(a)** ask the user whether they want to set up an equivalent tokens-scaffold
+     mechanism first (mirroring `packages/wireframe-tokens/`, generating a locked Tailwind config
+     from this project's own DESIGN.md spacing/typography/border-radius values), or **(b)** if the
+     user wants to proceed without it, hand-author the wireframe directly: read the current
+     project's own `DESIGN.md` (or equivalent design doc), pull its actual spacing/typography/
+     border-radius values, and write Tailwind classes/inline styles that encode those values
+     directly — explaining clearly that the automated scaffold/sync/verify steps are being skipped
+     because the mechanism isn't present in this project, so nothing enforces the mapping
+     automatically and it must be kept correct by hand.
+
+   If the scaffold script and package DO exist in this project, proceed as below.
+
    New file:
    ```bash
    npm run wireframe:scaffold -- docs/tickets/<id>/wireframe.html
@@ -52,8 +71,11 @@ See `packages/wireframe-tokens/README.md` for the underlying mechanism.
    </div>
    ```
 
-4. **Verify before handing off.** Run the verification script against the
-   finished file — or just commit it, since the local pre-commit hook
+4. **Verify before handing off.** If step 1 found the scaffold mechanism missing and you
+   hand-authored the wireframe per option (b), there is no verification script to run either —
+   say so, and instead do a manual pass: re-check every class/style against the values you pulled
+   from the project's own DESIGN.md. Otherwise, run the verification script against the finished
+   file — or just commit it, since the local pre-commit hook
    (`.githooks/pre-commit`) runs this automatically for every staged
    `docs/**/wireframe.html`/`docs/**/hifi.html` and blocks the commit if it
    fails:

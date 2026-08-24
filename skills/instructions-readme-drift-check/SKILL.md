@@ -34,7 +34,7 @@ Produce a concise drift report with:
 
 1. Build a README source-of-truth index.
 2. Extract from README:
-   - architecture boundaries (`api`, `query`, `query/cache`, `services`, `pages`, `components`)
+   - architecture boundaries (the folder/module boundaries this project's README actually defines)
    - decision table responsibilities
    - naming/file conventions
    - strict guardrails and non-negotiable rules

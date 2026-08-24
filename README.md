@@ -6,7 +6,7 @@ Reusable Claude Code harness, extracted from [lista-natin](https://github.com/) 
 
 - **`skills/`** — `tdd`, `testable-app-logic`, `wireframe-html`, `regression-sweep`, `ship-non-ui`, `ship-ui`, `browser-verify`, `tech-lead-review`, `tech-lead-review-with-fix`, `instructions-readme-drift-check`, and `harness-init` (the onboarding/generator skill — see below).
 - **`agents/`** — `tech-lead-review*` (architecture-enforcer, code-quality, patterns, tests), `ux-builder`, `ux-reviewer`, `goal-satisfaction-reviewer`. (`dev-showcase-reviewer` deliberately excluded — lista-natin-specific dev-showcase feature.)
-- **`hooks/`** — gate/TDD/ticket-registry hooks, config-driven (see `.claude/harness.config.json` below). `hooks/examples/` holds `layer-boundary-guard.sh` and `no-page-test-guard.sh` — lista-natin's own React-Native layer-model enforcement, kept as reference but **not** wired into the default `hooks.json` since they assume a folder layout (`api/`, `query/`, `pages/`) other projects won't share. Copy into a project's own local hooks if that project has the same layer model.
+- **`hooks/`** — gate/TDD/ticket-registry hooks, config-driven (see `.claude/harness.config.json` below). `hooks/examples/` holds three hooks kept as reference but **not** wired into the default `hooks.json`, because each encodes a rule specific to lista-natin rather than something every project shares — copy the relevant one into a project's own local hooks only if that project genuinely has the same rule: `layer-boundary-guard.sh` and `no-page-test-guard.sh` (lista-natin's React-Native layer-model enforcement — assume a folder layout, `api/`/`query/`/`pages/`, other projects won't share) and `block-raw-package-install.sh` (lista-natin's Expo-only "use `npx expo install`, not raw npm/yarn/pnpm" rule — would incorrectly block ordinary installs in a non-Expo project).
 - **`scripts/update-tickets-index.mjs`** — the ticket registry generator, pure mechanism, safe to copy verbatim into any project.
 - **`templates/`** — `CLAUDE.md.template`, `DESIGN.md.template`, `UX-COPY-GUIDE.md.template`, `docs/tickets/CONTEXT.md.template`, `harness.config.json.example`. Structure only — every project fills its own content in.
 
@@ -39,10 +39,10 @@ It surveys the project, writes `.claude/harness.config.json` (gate commands, TDD
 /plugin marketplace update earthjan-harness
 ```
 
-No `version` field is set on `plugin.json` yet (MVP — iterating fast); consumers track the latest git state. Add semver pinning once this stabilizes and multiple projects depend on it not moving under them mid-task.
+No `version` field is set on `plugin.json` yet (MVP — iterating fast). A local-path install already pins to a specific commit at install time (`claude plugin list` shows a fixed short hash per install) — it's `/plugin marketplace update earthjan-harness` that moves a project onto whatever the plugin repo's HEAD is now, not every session. Add semver pinning once this stabilizes and multiple projects depend on it not moving under them mid-task.
 
 ## Known MVP gaps (improve later, not blocking)
 
 - Hook defaults assume `npm`; `.claude/harness.config.json` overrides but isn't auto-detected yet — `harness-init` should eventually read `package.json` and write it automatically rather than asking.
 - No automated test coverage for the hook scripts themselves.
-- `browser-verify` and `ship-ui`/`ship-non-ui` still reference lista-natin's own doc paths in prose in a few places — flagged for cleanup as each gets used on a second project and the seams that don't generalize become visible.
+- `track-gate-commands.sh`'s command-matching is brittle against parenthesized subshells (`(cd sub-dir && yarn test)`) and monorepo-scoped invocations (`yarn workspace X test`) — a real risk in a multi-repo container project, not just a theoretical one. Not blocking for MVP; a config option to match a command by regex instead of exact string would fix it.

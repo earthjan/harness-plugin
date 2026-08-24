@@ -1,0 +1,91 @@
+// ESLint config template — STARTING POINT, NOT A DROP-IN CONFIG.
+//
+// This gives you generic, broadly-reusable pieces (base ESLint/TypeScript
+// parser setup, Expo/React Native plugin wiring, ignores for build output)
+// plus ONE illustrative example block showing the *shape* of a layer-
+// boundary rule. Adapt it to your own actual stack and layer model:
+//   - If you're not on Expo/React Native, replace `eslint-config-expo/flat`
+//     with your own base config (e.g. `@typescript-eslint/eslint-plugin`,
+//     `eslint-config-next`, plain `@eslint/js`, etc.).
+//   - If your project has its own custom local ESLint rules package, wire
+//     it up the way the commented-out line below shows.
+//   - Rewrite the example `no-restricted-imports` block below (or delete
+//     it) once you've written your project's own real boundary rules —
+//     it's illustrative only and uses `{{PLACEHOLDER}}` folder names, not
+//     real ones.
+//
+// https://docs.expo.dev/guides/using-eslint/
+const { defineConfig } = require("eslint/config");
+const expoConfig = require("eslint-config-expo/flat");
+// const localRules = require("{{LOCAL_RULES_PACKAGE}}"); // only if this project has its own custom-rules package
+const globals = require("globals");
+
+module.exports = defineConfig([
+  expoConfig,
+  {
+    // Example: plain CommonJS .js files that run under `node` directly
+    // (no build step) don't get test globals (`describe`/`it`/`expect`)
+    // for free the way TS files might via tsconfig's `types: ["jest"]`.
+    // Declare them explicitly for whatever glob covers those files in
+    // your project.
+    files: ["{{PLAIN_JS_TEST_FILES_GLOB}}"],
+    languageOptions: {
+      globals: { ...globals.node, ...globals.jest },
+    },
+  },
+  {
+    // Example: exclude non-source HTML/mock files from lint entirely.
+    ignores: ["{{NON_SOURCE_FILES_GLOB}}"],
+  },
+  {
+    settings: {
+      "import/resolver": {
+        typescript: {
+          alwaysTryTypes: true,
+          project: "./tsconfig.json",
+        },
+      },
+    },
+  },
+  {
+    rules: {
+      "react-hooks/rules-of-hooks": "error",
+    },
+  },
+  {
+    // EXAMPLE — layer-boundary rule shape. Delete or replace once you've
+    // written your project's own real boundary rules.
+    //
+    // This example blocks a data-access client (e.g. a DB/HTTP SDK) from
+    // being imported anywhere outside a dedicated data-access folder, so
+    // that data access stays centralized instead of leaking into UI or
+    // business-logic code.
+    files: ["{{SRC_ROOT}}/**/*.{ts,tsx}"],
+    ignores: ["**/{{DATA_ACCESS_FOLDER}}/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              regex: "^{{DB_CLIENT_PACKAGE_NAME}}(/.*)?$",
+              message:
+                "{{DB_CLIENT_PACKAGE_NAME}} imports are only allowed in {{DATA_ACCESS_FOLDER}}/ folders. See your project's architecture doc.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // Example: disable a rule for a specific folder where it false-
+    // positives on a valid pattern your project relies on.
+    files: ["{{EXCEPTION_FILES_GLOB}}"],
+    rules: {
+      "import/namespace": "off",
+    },
+  },
+  {
+    ignores: ["dist/*"],
+  },
+]);

@@ -46,14 +46,11 @@ Act as a **senior engineer** for this project:
 
 **Hard constraints (from project architecture):**
 
-- No Firebase imports outside `api/`
-- No TanStack Query outside `query/`
-- No business logic in pages, templates, or UI components
-- SOLID OOP required in `services/core/`, `api/`, `query/`, `utils/`
-- `services/core/` must be pure — no React hooks, no Firebase
-- Firestore integrity: all persisted collections must have `createdAt` and `updatedAt`; activity logs are permanent and append-only
+Read the current project's own `CLAUDE.md` — its "Non-Negotiable Boundaries" / "Architecture" section (naming varies by project) — and apply whatever hard constraints that project actually documents. Do not assume any specific stack, layer names, or folder layout; they are this project's own and vary from project to project.
 
-**Completion criterion:** All plan steps implemented. Run `npm run tsc && npm run lint && npm test` — all must pass.
+For example, a project might document constraints like "no Firebase imports outside `api/`", "no TanStack Query outside `query/`", "no business logic in pages/templates/UI components", "SOLID OOP required in `services/core/`", or specific data-integrity rules for its persistence layer — but treat these as illustrative only. Pull the real list from the current project's own docs before implementing.
+
+**Completion criterion:** All plan steps implemented. Run the project's configured gates — read `gates.typecheck`, `gates.lint`, and `gates.test` from `.claude/harness.config.json` if that file exists in the project, otherwise default to `npm run tsc`, `npm run lint`, and `npm test` respectively — all must pass.
 
 ## Phase 2.5: Blast-Radius Regression Smoke Check
 
@@ -187,7 +184,7 @@ On iteration ≥ 2, only append genuinely new findings; update statuses of exist
   consumers not already covered by `REVIEWS/BLAST-RADIUS.md`, extend that record per Phase 2.5
   step 6 before moving on.
 
-After loop exit, run `npm run tsc && npm run lint && npm test`. Fix mechanical failures without re-review.
+After loop exit, run the project's configured gates (see the Phase 2 completion criterion above for how to resolve them). Fix mechanical failures without re-review.
 
 ## Phase 3.5: Goal-Satisfaction Review
 

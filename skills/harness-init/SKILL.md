@@ -15,7 +15,7 @@ lista-natin is the source-of-truth harness this plugin was extracted from. When 
 
 2. **Detect the gate commands.** From `package.json` scripts (or the project's actual command history if scripts aren't standard names), determine the real typecheck/lint/test commands. Default assumption is `npm run tsc` / `npm run lint` / `npm test` — override per what's actually there (e.g. `yarn tsc`, `yarn lint`, `yarn test`).
 
-3. **Write `.claude/harness.config.json`** (see `templates/harness.config.json.example`) with the detected gate commands and, if the project has a `services/app-logic` + `services/core` split, the TDD-gated dirs — otherwise ask the user what the equivalent testable-unit boundary is for this project, or leave `tddGatedDirs` empty if none applies yet.
+3. **Write `.claude/harness.config.json`** (see `templates/harness.config.json.example`) with the detected gate commands and, if the project has a `services/app-logic` + `services/core` split, the TDD-gated dirs — otherwise ask the user what the equivalent testable-unit boundary is for this project, or leave `tddGatedDirs` empty if none applies yet. Also add `.claude/harness-state/` to the project's `.gitignore` if it isn't already covered — every hook writes session-scoped log/marker files there, and left untracked-but-ungitignored they show up as noise in `git status`.
 
 4. **Generate/update `CLAUDE.md`** from `templates/CLAUDE.md.template`. Keep every section marked PROCESS verbatim (TDD law, acceptance criteria structure, ticket registry harness) — these are the plugin's non-negotiable practice, not per-project choices. Fill every `{{PLACEHOLDER}}` from what step 1 found; where nothing exists yet, ask the user rather than inventing architecture. If a project `CLAUDE.md` already exists, diff against the template and propose changes — don't silently overwrite content the user wrote by hand.
 
@@ -25,7 +25,9 @@ lista-natin is the source-of-truth harness this plugin was extracted from. When 
 
 7. **Reconcile local skills/agents that overlap with the plugin.** If the project has its own `.claude/skills/<name>` or `.claude/agents/<name>.md` that duplicate something this plugin now provides (e.g. a project-local `ship-non-ui` or `tech-lead-review`), tell the user which ones collide and confirm before removing the local copy — the plugin version wins by default since lista-natin is the source of truth, but don't delete project-specific customizations without a look.
 
-8. **Report a summary**, not a wall of diffs: what was created, what was updated, what was left for the user to fill in by hand, and any collisions found in step 7 that still need a decision.
+8. **Flag any plugin content that still needs a project-specific pass.** Even genericized, a few plugin components carry an explicit "adapt before first real use" note in their own file (`browser-verify` — dev server URL/viewport/auth accounts; `wireframe-html` — the scaffold script fallback; `testable-app-logic` — non-React idiom mapping). Check each one's own applicability/fallback note and tell the user which apply to this project and what, concretely, still needs filling in before that skill is trustworthy here — don't let this pass silently just because the plugin loaded without error.
+
+9. **Report a summary**, not a wall of diffs: what was created, what was updated, what was left for the user to fill in by hand, any collisions found in step 7, and any adapt-before-use flags from step 8 that still need a decision.
 
 ## What this skill does NOT do
 

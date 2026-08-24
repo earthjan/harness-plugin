@@ -6,12 +6,6 @@
         "hooks": [
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/tdd-gate.sh\"", "timeout": 10 }
         ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/block-raw-package-install.sh\"", "timeout": 10 }
-        ]
       }
     ],
     "PostToolUse": [

@@ -174,7 +174,9 @@ session. Each wakeup:
    BLOCKED/EXPECTED-FAIL row directly with the citation — no dispatch spent.
 5. Otherwise, dispatch exactly one subagent for that scenario. Its prompt must
    contain, verbatim or by exact file pointer: an instruction to load `browser-verify`
-   first, then follow docs/how-to-fe-test/CONTEXT.md and TEST-PLAN.md's conventions;
+   first, then follow this project's own frontend-testing runbook doc, if one exists
+   (check for something like docs/how-to-fe-test/CONTEXT.md or similar) and
+   TEST-PLAN.md's conventions;
    confirmation that named agent-browser sessions are already logged in (check with a
    snapshot, don't blindly re-login); the exact scenario row it's responsible for,
    copied verbatim; the parts of each ticket's CONTEXT.md that row depends on; the

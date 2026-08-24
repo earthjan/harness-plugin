@@ -64,31 +64,28 @@ Act as a **senior front-end engineer** for this project:
 
 **Hard constraints (from project architecture):**
 
-- No Firebase imports outside `api/`
-- No TanStack Query outside `query/`
-- No business logic in pages, templates, or UI components
-- `Lista`-prefixed shared components from `modules/shared/components` for standard controls
-- Template-first: one template per screen, thin pages
+Read the current project's own `CLAUDE.md` — its "Non-Negotiable Boundaries" / "Architecture" section (naming varies by project) — and apply whatever hard constraints that project actually documents. Do not assume any specific stack, layer names, folder layout, or component-library convention; they are this project's own and vary from project to project.
+
+For example, a project might document constraints like "no Firebase imports outside `api/`", "no TanStack Query outside `query/`", "no business logic in pages/templates/UI components", "use `Lista`-prefixed shared components from `modules/shared/components` for standard controls", or "template-first: one template per screen, thin pages" — but treat these as illustrative only. Pull the real list from the current project's own docs before implementing.
 
 **DESIGN.md compliance — decide per element while building, not at review time**
-(see `docs/agent-learning-logs.md` 2026-08-21, Ticket 102 — DESIGN.md already had the answer in every
-finding logged there, but was only consulted after the user pushed back on a rendered mock):
 
-- **Spacing:** every gap gets a named DESIGN.md §2 role, not a number that "looks plausible" — micro (4dp),
-  inline/icon (8dp), card-internal/related-items (16dp), screen/card padding or generic section gap (24dp),
-  section-to-section (32dp), large section separation (40dp), major boundary (48dp). Applies at every
-  fidelity level, including greyscale wireframes — "low-fidelity" waives color/decoration, never
-  measurements.
-- **Type:** use DESIGN.md §4 type-scale tokens (and component dimensions — avatar §11, chip §9, touch
-  targets §10) for every text element and sized component, at every fidelity level.
-- **Reflow:** every list-row-shaped element (avatar + name + tag + amount, etc.) needs an explicit,
-  decided-up-front reflow strategy per §24 "No Scrolling" — which content gets its own full-width line and
-  never wraps/truncates first (typically the name), and which pieces share a line and degrade first
-  (date/status, then decorative elements like a rank badge). Verify it holds at more than the target device
-  width — see `browser-verify`'s two-width mandate.
+Read the current project's own `DESIGN.md` (or equivalent design-system doc) in full and use whatever section numbers and token names it actually defines — do not assume specific section numbers or token names belong to every project. At minimum, before building, confirm from the project's own doc:
 
-**Completion criterion:** All plan steps implemented. Run `npm run tsc && npm run lint && npm test` — all
-must pass. **If PLAN.md has a Mock Element Inventory, run `browser-verify`'s interaction smoke check and
+- **Spacing:** every gap should map to a named spacing role/token the project's design doc defines, not a number that "looks plausible." Applies at every fidelity level, including greyscale wireframes — "low-fidelity" waives color/decoration, never measurements.
+- **Type:** use the project's own type-scale tokens (and documented component dimensions — avatars, chips, touch targets, etc.) for every text element and sized component, at every fidelity level.
+- **Reflow:** every list-row-shaped element (avatar + name + tag + amount, etc.) needs an explicit, decided-up-front reflow strategy per whatever "no scrolling"/reflow rule the project's design doc specifies — which content gets its own full-width line and never wraps/truncates first (typically the name), and which pieces share a line and degrade first (secondary info, then decorative elements). Verify it holds at more than the target device width — see `browser-verify`'s two-width mandate.
+
+For example, lista-natin's own `DESIGN.md` documents this as §2 (spacing scale: micro 4dp, inline/icon 8dp,
+card-internal/related-items 16dp, screen/card padding or generic section gap 24dp, section-to-section 32dp,
+large section separation 40dp, major boundary 48dp), §4 (type scale), §9 (chip), §10 (touch targets), §11
+(avatar), and §24 ("No Scrolling" reflow rule) — shown here as one illustrative example of what this kind
+of constraint looks like, not as the section numbers to check in every project.
+
+**Completion criterion:** All plan steps implemented. Run the project's configured gates — read
+`gates.typecheck`, `gates.lint`, and `gates.test` from `.claude/harness.config.json` if that file exists in
+the project, otherwise default to `npm run tsc`, `npm run lint`, and `npm test` respectively — all must
+pass. **If PLAN.md has a Mock Element Inventory, run `browser-verify`'s interaction smoke check and
 mock-parity check against it before Phase 3** — tap every element marked interactive and confirm an
 observable effect, and walk each inventory row against the live screenshots with evidence (screenshot or
 measurement), not a "looks right" summary.
@@ -227,7 +224,7 @@ On iteration ≥ 2, only append genuinely new findings; update statuses of exist
   consumers not already covered by `REVIEWS/BLAST-RADIUS.md`, extend that record per Phase 2.5
   step 6 before moving on.
 
-After loop exit, run `npm run tsc && npm run lint && npm test`. Fix mechanical failures without re-review.
+After loop exit, run the project's configured gates (see the Phase 2 completion criterion above for how to resolve them). Fix mechanical failures without re-review.
 
 ## Phase 3.5: Goal-Satisfaction Review
 

@@ -18,12 +18,14 @@ no reseed, no dispatch, no commit. Stop the loop immediately.
 Check: does `RESULTS.md` exist in this directory yet?
 
 - **If it does not exist**, this is the first wakeup:
-  1. Confirm `.env.local` has `EXPO_PUBLIC_ENABLE_DEV_EMAIL_AUTH=true`.
-  2. Start the emulators (`npm run emulators`, left running) if not already running.
-  3. Reseed: `npm run seed:emulator`. **This is the one and only reseed for the entire sweep** —
+  1. Confirm `{{AUTH_SETUP_COMMAND}}` <!-- e.g. .env.local has EXPO_PUBLIC_ENABLE_DEV_EMAIL_AUTH=true --> is in place.
+  2. Start the dev server (`{{DEV_SERVER_STARTUP_COMMAND}}` <!-- e.g. npm run emulators -->, left running) if not already running.
+  3. Reseed: `{{SEED_COMMAND}}` <!-- e.g. npm run seed:emulator -->. **This is the one and only reseed for the entire sweep** —
      never again on any later wakeup, regardless of how stale the data looks.
-  4. Open and log in both named `agent-browser` sessions: `--session admin`, `--session
-     participant`, at viewport `412 914`. These persist across every later dispatch in this loop.
+  4. Open and log in both named `agent-browser` sessions using `{{DEV_ACCOUNTS}}` <!-- e.g.
+     admin@dev.test / participant@dev.test, password: password -->: `--session admin`, `--session
+     participant`, at viewport `{{VIEWPORT}}` <!-- e.g. 412 914 -->. These persist across every
+     later dispatch in this loop.
   5. Create `RESULTS.md` with only the header row from `templates/RESULTS-header.md` — no
      pre-filled rows.
   6. Commit: `git add <working directory>/RESULTS.md && git commit -m "docs(regression-<date>):
