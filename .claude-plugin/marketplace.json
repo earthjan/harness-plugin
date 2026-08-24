@@ -1,5 +1,6 @@
 {
   "name": "earthjan-harness",
+  "description": "Earth Jan's reusable Claude Code harness (source of truth: lista-natin).",
   "owner": { "name": "Earth Jan Baquir Marzan" },
   "plugins": [
     {
