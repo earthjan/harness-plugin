@@ -6,7 +6,7 @@ user-invocable: true
 
 # /ship-ui — Deliver UI from Spec to Ready
 
-Six-phase pipeline: **Plan → Implement → Blast-Radius Check → Review Loop → Goal-Satisfaction Review → Walkthrough**. Each phase gates on the previous. The main agent implements (as senior front-end engineer) and runs the Blast-Radius Check itself; subagents review (ux-reviewer for UX/design, the four tech-lead-review-* agents for architecture/code quality, goal-satisfaction-reviewer for spec compliance).
+Seven-phase pipeline: **Plan → Implement → Blast-Radius Check → Review Loop → Goal-Satisfaction Review → Manual QA → Walkthrough**. Each phase gates on the previous. The main agent implements (as senior front-end engineer) and runs the Blast-Radius Check and Manual QA execution itself; subagents review (ux-reviewer for UX/design, the four tech-lead-review-* agents for architecture/code quality, goal-satisfaction-reviewer for spec compliance, qa-test-planner/qa-test-plan-reviewer for the manual QA plan).
 
 ### Delivery Working Directory
 
@@ -221,7 +221,7 @@ On iteration ≥ 2, only append genuinely new findings; update statuses of exist
 
 ### Exit Conditions
 
-- Every finding in `REVIEWS/FINDINGS.md` is `FIXED` and verified in re-review → proceed to Phase 4
+- Every finding in `REVIEWS/FINDINGS.md` is `FIXED` and verified in re-review → proceed to Phase 3.5
 - Iteration 5 reached with findings still `OPEN` or `WAIVED` → flag remaining items, proceed
 - Same blocker persists across 2 iterations → flag for manual resolution, proceed
 - Before proceeding: if any fix applied this iteration touched a hook/component/query/service with
@@ -248,9 +248,9 @@ LOOP:
   ITERATION += 1
   1. Spawn goal-satisfaction-reviewer → reads PLAN.md acceptance criteria and staged diff
   2. Record the verdict per criterion in REVIEWS/GOAL-SATISFACTION.md
-  3. If PASS → exit loop, proceed to Phase 4
+  3. If PASS → exit loop, proceed to Phase 3.6
   4. If FAIL or PARTIAL → main agent addresses action items from the ledger, goto LOOP
-  5. If ITERATION == 3 and not PASS → flag all unresolved criteria for manual resolution, proceed to Phase 4
+  5. If ITERATION == 3 and not PASS → flag all unresolved criteria for manual resolution, proceed to Phase 3.6
 ```
 
 ### Spawning the Reviewer
@@ -265,15 +265,107 @@ Agent({subagent_type: "harness-plugin:goal-satisfaction-reviewer", description: 
 
 | Verdict  | Action |
 |----------|--------|
-| PASS     | Proceed to Phase 4 |
+| PASS     | Proceed to Phase 3.6 |
 | PARTIAL  | Main agent addresses action items, re-review |
 | FAIL     | Main agent addresses action items, re-review |
 
 ### Exit Conditions
 
-- PASS verdict → proceed to Phase 4
-- Iteration 3 reached with unresolved criteria → flag remaining items with their last status and evidence, proceed to Phase 4
+- PASS verdict → proceed to Phase 3.6
+- Iteration 3 reached with unresolved criteria → flag remaining items with their last status and evidence, proceed to Phase 3.6
 - Before proceeding: if any action item addressed this iteration touched a hook/component/query/service with consumers not already covered by `REVIEWS/BLAST-RADIUS.md`, extend that record per Phase 2.5 step 6 before moving on.
+
+## Phase 3.6: Manual QA (Test Plan + Execution)
+
+Fills the gap the rest of this pipeline leaves: Phases 2–3.5 verify code quality, UX, and that the
+diff satisfies its acceptance criteria by reading it — none of them actually run the app. This phase
+does, using `agent-browser` (assumed installed — see `browser-verify`'s own note on this). It has two
+parts: a bounded maker/checker loop that produces the test plan, then a bounded execution-and-fix loop
+that runs it and fixes what fails. This phase is **genuinely blocking** on the final "Ready for
+commit" verdict in Phase 4 — unlike the flag-and-proceed exit conditions on the phases above, unresolved
+failures here keep the delivery marked not ready.
+
+**Target URL:** default to `http://localhost:3000`. If the user gave a different URL/port for this
+delivery, resolve it once here and reuse it for every scenario in this phase — same rule as the
+delivery working directory.
+
+**Screenshot Directory:** resolve once here, alongside the target URL, and reuse it for the rest of
+this phase. Screenshots are part of the durable record of a delivery, the same evidence discipline
+Phase 2.5's `screenshots/blast-radius/` already follows — this phase must not create a stray second
+screenshots directory when one is already sitting right there.
+
+1. Search the delivery working directory's own subtree for a directory literally named `screenshots`
+   (e.g. `find <delivery working directory> -type d -name screenshots`). This will almost always find
+   the one Phase 2.5 already created (`screenshots/blast-radius/`'s parent), or a pre-existing one the
+   ticket/project already uses.
+2. If one or more exist, use whichever is **closest** to the delivery working directory root (fewest
+   path segments below it). Don't search outside the delivery working directory's own subtree — a
+   `screenshots/` dir from an unrelated ticket or the project root is not a match.
+3. If none exist anywhere in that subtree, create `screenshots/` directly in the delivery working
+   directory.
+4. This phase's own screenshots go under `<resolved screenshots dir>/qa/`, one file per scenario
+   execution attempt (e.g. `qa/SCENARIO-03-attempt-1.png`) — suffix with the attempt number so repeat
+   attempts across `EXEC_ITERATION` rounds don't overwrite each other's evidence.
+
+### Part A — Test Plan Loop (bounded 10)
+
+Same two-stage shape as Phase 3's review loop: collect (spawn, persist raw output), settle (act on
+findings). Plan artifacts live under `REVIEWS/qa-plan/` in the delivery working directory.
+
+```
+ITERATION = 0
+LOOP:
+  ITERATION += 1
+  mkdir -p REVIEWS/qa-plan/iteration-$(printf %02d "$ITERATION")
+
+  1. Spawn qa-test-planner — iteration 1: fresh plan from PLAN.md's Acceptance Criteria and
+     REVIEWS/BLAST-RADIUS.md; iteration > 1: hand it the prior plan and this iteration's review
+     feedback → write output to REVIEWS/qa-plan/iteration-NN/plan.md
+  2. Spawn qa-test-plan-reviewer on that plan → write output to REVIEWS/qa-plan/iteration-NN/review.md
+  3. If verdict == approved → promote plan.md to REVIEWS/QA-TEST-PLAN.md (every scenario starts
+     state: not_started), exit loop
+  4. If ITERATION == 10 and verdict != approved → promote the current plan.md to
+     REVIEWS/QA-TEST-PLAN.md anyway, append the reviewer's unresolved findings as a "Known Gaps"
+     section at the top, exit loop
+```
+
+```
+Agent({subagent_type: "harness-plugin:qa-test-planner", description: "Draft a manual QA test plan scoped to PLAN.md's acceptance criteria and REVIEWS/BLAST-RADIUS.md's consumers. Target URL: <resolved target URL>."})
+
+Agent({subagent_type: "harness-plugin:qa-test-plan-reviewer", description: "Review the manual QA test plan at REVIEWS/qa-plan/iteration-NN/plan.md for AC coverage, blast-radius coverage, and testability."})
+```
+
+### Part B — Execution + Fix Loop (bounded 5, main agent)
+
+You (main agent) execute this — same "main agent implements, main agent fixes" pattern as Phase 2.5's
+blast-radius smoke check, not a subagent. Results are written to `REVIEWS/QA-TEST-PLAN.md` in place
+(update each scenario's `State:` line and add an `Evidence:` line), and screenshots go under
+`<resolved screenshots dir>/qa/` (see Screenshot Directory above).
+
+```
+EXEC_ITERATION = 0
+LOOP:
+  EXEC_ITERATION += 1
+  For each scenario in REVIEWS/QA-TEST-PLAN.md with state != passing:
+    1. Run its steps via agent-browser against the resolved target URL
+    2. Compare the actual outcome to the scenario's expected result
+    3. Update its State to `passing` (with an Evidence line: screenshot path or observed output) or
+       `failing` (with an Evidence line: what actually happened, and why it doesn't match)
+  If every scenario is passing → exit loop, proceed to Phase 4 with Manual QA: PASS
+  If EXEC_ITERATION == 5 and failures remain → stop fixing, exit loop, proceed to Phase 4 with
+    Manual QA: FAIL — the remaining failing scenarios carry into the readout as blocking the
+    "Ready for commit" verdict
+  Otherwise: for each failing scenario, fix its root cause (same WIP=1 and test-first discipline as
+    any other finding in this pipeline — read the failing code path, write/adjust a test if the gap
+    is at a testable seam, then fix), re-stage, goto LOOP
+```
+
+**A fix touching new ground:** if a fix here touches a hook/component/query/service with consumers not
+already covered by `REVIEWS/BLAST-RADIUS.md`, extend that record per Phase 2.5 step 6, and add the
+newly-covered consumer as a regression scenario to `REVIEWS/QA-TEST-PLAN.md` before continuing.
+
+**Completion criterion:** `REVIEWS/QA-TEST-PLAN.md` exists with every scenario in a terminal state
+(`passing` or `failing`, each with evidence) — never left `not_started` when this phase exits.
 
 ## Phase 4: Delivery Record, Walkthrough & Readout
 
@@ -285,8 +377,8 @@ Agent({subagent_type: "harness-plugin:goal-satisfaction-reviewer", description: 
 **DELIVERY.md structure:**
 
 - **What was implemented** — files created and modified with brief descriptions, reflecting the actual delivered state after all reviews
-- **Callouts** — notable points worth flagging: deviations from PLAN.md, decisions made during implementation, review findings and how they were resolved (waived findings carry their rationale here), plus a link to `REVIEWS/FINDINGS.md`; the blast-radius result copied from `REVIEWS/BLAST-RADIUS.md` (screens checked and evidence, or the no-blast-radius note), with a link to that file too
-- **Remaining items** — anything left undone: unresolved findings, flagged criteria, open questions
+- **Callouts** — notable points worth flagging: deviations from PLAN.md, decisions made during implementation, review findings and how they were resolved (waived findings carry their rationale here), plus a link to `REVIEWS/FINDINGS.md`; the blast-radius result copied from `REVIEWS/BLAST-RADIUS.md` (screens checked and evidence, or the no-blast-radius note), with a link to that file too; the manual QA result copied from `REVIEWS/QA-TEST-PLAN.md` (scenario pass/fail counts, any Known Gaps from Part A), with a link to that file too
+- **Remaining items** — anything left undone: unresolved findings, flagged criteria, failing QA scenarios, open questions
 
 **WALKTHROUGH.md structure:**
 
@@ -343,6 +435,14 @@ Pass N: Clean (0 open findings)
 **Unresolved (if any):**
 - Criterion #N: <status> — <summary of issue>
 
+### Manual QA
+**Plan:** `REVIEWS/QA-TEST-PLAN.md`
+**Plan iterations:** <N>/10 <(approved | cap reached — see Known Gaps)>
+**Execution iterations:** <N>/5
+**Scenarios:** <X>/<Y> passing
+**Failing (if any):**
+- SCENARIO-<NN>: <title> — <what failed, evidence path>
+
 ### Remaining Items
 - [ ] <item> — <reason not resolved>
 
@@ -355,11 +455,13 @@ Pass N: Clean (0 open findings)
 ✅ All clear — ready for git add and commit.
 — or —
 ⚠️ <N> items remain — review the remaining items above before committing.
+— or —
+🚫 Not ready — <N> manual QA scenario(s) still failing after Phase 3.6's execution cap. Fix before shipping.
 ```
 
 ### Persistence
 
-Keep `PLAN.md`, `DELIVERY.md`, `WALKTHROUGH.md`, and the `REVIEWS/` directory (per-iteration raw outputs, `FINDINGS.md`, `GOAL-SATISFACTION.md`, `BLAST-RADIUS.md`, and `screenshots/blast-radius/`) in the delivery working directory after the walkthrough — do not delete them. Together they are the durable, documented record of the delivery: the plan, the per-iteration review feedback, the delivered reality, and the guide to navigating it. When the work maps to a ticket, the copies registered in the ticket directory (`PROGRESS.md`, `WALKTHROUGH.md`) are the cross-session entry points — keep them in sync if the delivery-working-directory files change.
+Keep `PLAN.md`, `DELIVERY.md`, `WALKTHROUGH.md`, and the `REVIEWS/` directory (per-iteration raw outputs, `FINDINGS.md`, `GOAL-SATISFACTION.md`, `BLAST-RADIUS.md`, `qa-plan/`, `QA-TEST-PLAN.md`) in the delivery working directory after the walkthrough — do not delete them. Same for `screenshots/blast-radius/` (created directly in the delivery working directory by Phase 2.5) and this phase's own `<resolved screenshots dir>/qa/` — Phase 3.6's resolution (see above) will typically find and reuse that same `screenshots/` root Phase 2.5 already created, but if Phase 2.5 found no blast radius, `qa/` may live under a `screenshots/` directory this phase created itself instead. Together they are the durable, documented record of the delivery: the plan, the per-iteration review feedback, the delivered reality, and the guide to navigating it. When the work maps to a ticket, the copies registered in the ticket directory (`PROGRESS.md`, `WALKTHROUGH.md`) are the cross-session entry points — keep them in sync if the delivery-working-directory files change.
 
 ## Key Behaviors
 
@@ -372,8 +474,10 @@ Keep `PLAN.md`, `DELIVERY.md`, `WALKTHROUGH.md`, and the `REVIEWS/` directory (p
 | Record delivery          | Write DELIVERY.md after the reviews — implemented state, callouts, remaining items |
 | Walk the change          | Write WALKTHROUGH.md — escalations/flags up top, then WHY-driven per-file tour |
 | Blast-radius smoke check | Phase 2.5 transitively walks consumers of any shared seam this delivery touched (capped at 5), before Phase 3 review — bounded to this diff's reach, not a full sweep; findings persist to `REVIEWS/BLAST-RADIUS.md` immediately |
+| Manual QA is blocking    | Phase 3.6 runs the approved test plan via agent-browser and fixes failures itself (capped at 5 rounds) — unlike the other phases' flag-and-proceed exit, unresolved failures here flip Phase 4's "Ready for commit" verdict to not-ready |
+| QA plan is maker/checker | qa-test-planner drafts, qa-test-plan-reviewer critiques (read-only), looped up to 10 rounds before the plan is promoted to `REVIEWS/QA-TEST-PLAN.md` — same shape as Phase 3's review loop, capped higher since a bad plan is cheaper to re-round than a bad implementation |
 | Main agent implements    | You are the senior FE — no subagent for implementation               |
-| Subagents review         | ux-reviewer, the four tech-lead-review-* agents, and goal-satisfaction-reviewer spawned as subagents |
+| Subagents review         | ux-reviewer, the four tech-lead-review-* agents, goal-satisfaction-reviewer, qa-test-planner, and qa-test-plan-reviewer spawned as subagents |
 | Fix everything           | Clear blockers, warnings, AND nitpicks — nothing is skipped          |
 | Walkthrough is a readout | Present final state and todo list — don't block on user confirmation |
 | Delivery working directory | Resolve once up front: the directory the user specified for this delivery, else the project root. Every artifact below (PLAN.md, REVIEWS/, DELIVERY.md, WALKTHROUGH.md, ticket registry) goes there — never default to root once a directory is given |
@@ -389,6 +493,8 @@ All reviewers are invocable directly outside this pipeline:
 - `Agent({subagent_type: "harness-plugin:tech-lead-review-patterns"})` — review any branch/staged diff for domain language, patterns, and conventions
 - `Agent({subagent_type: "harness-plugin:tech-lead-review-tests"})` — review any branch/staged diff for test placement, coverage, and assertion quality
 - `Agent({subagent_type: "harness-plugin:goal-satisfaction-reviewer"})` — verify that delivered implementation satisfies acceptance criteria in PLAN.md
+- `Agent({subagent_type: "harness-plugin:qa-test-planner"})` — draft a manual QA test plan (scenarios to run via agent-browser) for any implemented feature
+- `Agent({subagent_type: "harness-plugin:qa-test-plan-reviewer"})` — review a manual QA test plan for AC coverage, blast-radius coverage, and testability
 
 ## Related
 
