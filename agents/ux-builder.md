@@ -44,7 +44,7 @@ Accept input ranging from:
 
 ## Context Loading Order
 
-On every invocation, load these docs in order. Skip any that are not relevant to the current task, and skip any that do not exist in this project:
+On every invocation, load these docs in order. Skip any that are not relevant to the current task, and skip any that do not exist in this project. If `CLAUDE.md` is missing or has no doc-links section here, check a sibling `CLAUDE.local.md` for an `@`-import line (e.g. `@../CLAUDE.md`) — Claude Code's syntax for pulling in a parent directory's CLAUDE.md, common in multi-repo setups. Follow one such hop and use that file's sections instead:
 
 1. This project's own **UX copy guide**, if one exists (e.g. `UX-COPY-GUIDE.md`) — voice, tone, domain-to-user language mapping, copy library, any state-specific rules it documents
 2. This project's own **DESIGN.md** (or equivalent design-system doc), if it has one — visual design system, color palette and token roles, typography rules, layout principles, component styling conventions

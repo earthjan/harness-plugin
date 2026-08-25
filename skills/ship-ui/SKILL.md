@@ -67,6 +67,8 @@ Act as a **senior front-end engineer** for this project:
 
 Read the current project's own `CLAUDE.md` — its "Non-Negotiable Boundaries" / "Architecture" section (naming varies by project) — and apply whatever hard constraints that project actually documents. Do not assume any specific stack, layer names, folder layout, or component-library convention; they are this project's own and vary from project to project.
 
+If `CLAUDE.md` is missing or has no such section here, check a sibling `CLAUDE.local.md` for an `@`-import line (e.g. `@../CLAUDE.md`) — Claude Code's syntax for pulling in a parent directory's CLAUDE.md, common in multi-repo setups. Follow one such hop and use that file's section instead.
+
 For example, a project might document constraints like "no Firebase imports outside `api/`", "no TanStack Query outside `query/`", "no business logic in pages/templates/UI components", "use `Lista`-prefixed shared components from `modules/shared/components` for standard controls", or "template-first: one template per screen, thin pages" — but treat these as illustrative only. Pull the real list from the current project's own docs before implementing.
 
 **DESIGN.md compliance — decide per element while building, not at review time**

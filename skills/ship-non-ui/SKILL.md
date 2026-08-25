@@ -48,6 +48,8 @@ Act as a **senior engineer** for this project:
 
 Read the current project's own `CLAUDE.md` — its "Non-Negotiable Boundaries" / "Architecture" section (naming varies by project) — and apply whatever hard constraints that project actually documents. Do not assume any specific stack, layer names, or folder layout; they are this project's own and vary from project to project.
 
+If `CLAUDE.md` is missing or has no such section here, check a sibling `CLAUDE.local.md` for an `@`-import line (e.g. `@../CLAUDE.md`) — Claude Code's syntax for pulling in a parent directory's CLAUDE.md, common in multi-repo setups. Follow one such hop and use that file's section instead.
+
 For example, a project might document constraints like "no Firebase imports outside `api/`", "no TanStack Query outside `query/`", "no business logic in pages/templates/UI components", "SOLID OOP required in `services/core/`", or specific data-integrity rules for its persistence layer — but treat these as illustrative only. Pull the real list from the current project's own docs before implementing.
 
 **Completion criterion:** All plan steps implemented. Run the project's configured gates — read `gates.typecheck`, `gates.lint`, and `gates.test` from `.claude/harness.config.json` if that file exists in the project, otherwise default to `npm run tsc`, `npm run lint`, and `npm test` respectively — all must pass.

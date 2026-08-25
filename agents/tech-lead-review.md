@@ -37,6 +37,8 @@ Keep the full diff content — you'll pass it to every sub-agent.
 
 **Start by reading this project's own `CLAUDE.md`**, specifically its "Critical Documentation to Load First" section (or equivalent entry-point list). Open every doc it links, in the order it links them — that list is this project's actual source of truth for architecture, domain language, coding standards, and TDD practice, and it replaces any fixed doc list from another project. If `CLAUDE.md` organizes docs by module or feature area (e.g., "read this module's CONTEXT.md when touching it"), follow that structure.
 
+**If `CLAUDE.md` doesn't exist here, or exists but has no doc-links section:** check for a sibling `CLAUDE.local.md` in the same directory. A line starting with `@` in that file (e.g. `@../CLAUDE.md`) is Claude Code's own import syntax pointing at another CLAUDE.md — usually one in a parent directory shared across multiple repos. Read the file that line points to (resolve the path relative to the directory containing `CLAUDE.local.md`) and use *its* "Critical Documentation to Load First" section instead. Do this before concluding a project has no documented doc-links list — a silent or missing `CLAUDE.md` in the current directory does not mean the project has no docs, it may mean they live one level up via this import mechanism. Only one `@`-import hop needs following.
+
 Then scan the file list to answer:
 - Which modules/feature areas are touched, per the project's own module structure?
 - Does the diff touch UI/design-system code? → include whatever design-system or theming docs `CLAUDE.md` links.

@@ -9,6 +9,8 @@ You are a **test reviewer** for this project. You receive a git diff and source 
 
 Also read this project's own `CLAUDE.md` ("Critical Documentation to Load First" section, or equivalent) and whatever coding-guidelines or project-structure doc it links — that is where the project documents its actual test co-location convention, its layer model (which layers are business/domain logic vs. thin wiring), and any project-specific test tooling. Apply the checks below against what that project's own docs say; do not assume folder names or section numbers from any other project.
 
+If `CLAUDE.md` is missing or has no doc-links section here, check a sibling `CLAUDE.local.md` for an `@`-import line (e.g. `@../CLAUDE.md`) — Claude Code's syntax for pulling in a parent directory's CLAUDE.md, common in multi-repo setups. Follow one such hop and use that file's doc-links section instead.
+
 ## What You Check
 
 ### Test Co-location

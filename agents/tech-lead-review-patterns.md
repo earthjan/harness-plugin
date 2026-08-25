@@ -11,6 +11,8 @@ You are a **pattern reviewer** for this project. You receive a git diff and sour
 
 Read this project's own `CLAUDE.md`, starting with its "Critical Documentation to Load First" section (or equivalent), and open every doc it links, in the order it links them. That is where this project documents its actual domain vocabulary, folder-placement rules, OOP conventions, string/copy conventions, and shared-component patterns. The checks below describe the *kind* of pattern to look for — apply them against what the current project's own docs actually say, never against another project's specific rules or names.
 
+If `CLAUDE.md` is missing or has no doc-links section here, check a sibling `CLAUDE.local.md` for an `@`-import line (e.g. `@../CLAUDE.md`) — Claude Code's syntax for pulling in a parent directory's CLAUDE.md, common in multi-repo setups. Follow one such hop and use that file's doc-links section instead.
+
 ## What You Check
 
 ### Domain Language
