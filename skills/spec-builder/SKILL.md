@@ -112,11 +112,38 @@ sounding filenames can catch this, unrelated to anything this skill is doing wro
 writing the same content to the same path via `Bash` (e.g. a heredoc). The content and location
 matter, not which tool put it there.
 
+## Phase 3.5 — Verify what the classifier merely asserted
+
+Phase 3 writes plausible options, not verified ones — it reads `SPEC.md` cold with no codebase
+access, so it can't confirm a factual claim even when one shows up in an option's tradeoff (a file
+count, "this pattern already exists," any specific number). Left unchecked, a wrong number ships to
+the user framed exactly like one that was actually checked. This phase is where that gets caught,
+before Phase 4 ever presents it.
+
+Grep the just-written `severity-classifier.md` for the literal `UNVERIFIED:` marker (see
+`references/severity-classification.md` for what triggers it). Skip this phase entirely if there
+are no hits — most tickets won't have any.
+
+For each hit, spawn one scoped `Agent` call — not a full `research-workflow` run, just a single
+targeted check against the real codebase/docs: "does implementing X actually touch 5 files, or
+more, and which ones." Write its answer to `docs/tickets/<id>/RESEARCH/verify-<slug>.md`, then fold
+the corrected fact — citing that file — back into `FINDINGS.md` in place of the `UNVERIFIED:`
+marker. Never let the marker itself reach Phase 4.
+
+If a verification agent comes back saying the claim is bigger than a fact-check — the decision
+actually hinges on how other products or an undocumented domain rule handle it, not just a count in
+this codebase — escalate that one item to a full `research-workflow` run scoped to it (topic = the
+one decision, output dir = `docs/tickets/<id>/RESEARCH/<slug>/`), the same escalation shape Phase 5
+already uses for a rippling resolution. Most items resolve with the single check; this is the
+exception, not the default.
+
 ## Phase 4 — Present, once
 
 Show the user `SPEC.md` with the classification applied, as one document, read once — not a
 question-by-question interrogation. Lead with a short count (how many critical items, how many
-presentation-only), then critical items first, presentation-only after.
+presentation-only), then critical items first, presentation-only after. By this point every
+option's factual claims are either checked (Phase 3.5) or explicitly still open — nothing reaches
+you framed as settled that was never actually confirmed.
 
 **Every critical item must be genuinely readable without outside context.** That's not a style
 preference here — it's load-bearing, because the whole point of surfacing something as critical is
@@ -141,7 +168,8 @@ already in the spec, or open a question that wasn't there before? A local resolu
 the record and you move on. A rippling one starts a new iteration (same `REVIEWS/iteration-NN`
 convention as Phase 3) scoped to what actually changed — re-examine the affected sections and
 re-classify; only fall back to a full `research-workflow` re-run if the ripple is itself genuinely
-open-ended, not just because a resolution touched more than one line.
+open-ended, not just because a resolution touched more than one line (same escalation shape as
+Phase 3.5).
 
 Finished when nothing critical remains unresolved and the user says so. At that point `SPEC.md` is
 what gets handed to `ship-ui`/`ship-non-ui` — point it at the file; there's nothing else to wire up.
@@ -152,7 +180,9 @@ what gets handed to `ship-ui`/`ship-non-ui` — point it at the file; there's no
 docs/tickets/<id>/
   CONTEXT.md            # registry entry (Phase 0, if the ticket is new)
   SPEC.md               # this skill's output — what ship-ui/ship-non-ui consume
-  RESEARCH/              # heavy path only — research-workflow's own multi-file output
+  RESEARCH/              # heavy path (Phase 1) and per-claim (Phase 3.5) output
+    verify-<slug>.md      # Phase 3.5 — single-claim fact-checks
+    <slug>/                # Phase 3.5 escalation — full research-workflow scoped to one decision
   REVIEWS/
     iteration-NN/severity-classifier.md
     FINDINGS.md

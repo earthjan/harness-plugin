@@ -87,6 +87,16 @@ first. Write each critical item so it's understandable with zero outside context
    recommendation dressed as a foregone conclusion; the whole reason this is surfaced is for the
    user to decide, not to rubber-stamp a choice already made for them.
 
+   If an option's tradeoff rests on a checkable factual claim — a file/integration-point count,
+   "this pattern already exists," a specific number of anything — that claim needs to actually be
+   checked, not just written down because it sounds plausible. This pass reads `SPEC.md` cold,
+   nothing else, so if `SPEC.md` itself asserts the fact you can note that, but you can't confirm
+   it against the real codebase from here — that verification happens one phase later, with real
+   access. Don't state an unconfirmed number as settled: write it inline as
+   `UNVERIFIED: <the claim>` instead. A plausible-sounding number that ships unchecked is worse
+   than an honest "not confirmed yet" — the first one fails silently, the second one gets caught
+   before anyone relies on it.
+
 Any file or function name belongs at the end, as a footnote for whoever implements it later — never
 as the explanation itself.
 
@@ -97,7 +107,9 @@ Return, per finding:
 - `decision` / `why-ambiguous` / `options` — the three-part write-up above, for every critical
   finding
 - `citation`: the project doc/section this reasoning is grounded in, when there is one (e.g. "this
-  project's data-integrity doc — '<the invariant as stated>'")
+  project's data-integrity doc — '<the invariant as stated>'"). Mandatory for any factual claim
+  inside `options` that you actually verified; if there's nothing to cite, the claim belongs
+  inline as `UNVERIFIED:` instead (see above), never stated as settled fact.
 
 Only mark something critical with real confidence it clears the bar above — this list is what the
 user reads first, so a false positive costs their attention on something that didn't need it, and a
