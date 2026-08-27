@@ -1,0 +1,72 @@
+# {{WORKFLOW_TITLE}}
+
+Entry file. Read this first; it links to the topic docs you need before spawning anything.
+
+## Goal (the `/goal` triple)
+
+- **Goal:** {{GOAL_STATEMENT}}
+- **Verification method:** {{VERIFICATION_METHOD}}
+- **Stopping condition:** every row in `TASKS.md` is `passing`, and R1 (this workflow
+  design's own independent review) has signed off with no unresolved findings — see
+  `PROGRESS.md` for the review log. Do not describe this file set as "final" until that has
+  actually happened; state the condition, don't assert it's already met.
+
+{{SCOPE_NOTES}}
+
+## Why a workflow, not a single agent
+
+Checked against the graph-justification criteria (independently decomposable work, real
+branch/rollback paths, intermediate state worth checkpointing, every stage has an explicit
+verifiable "done", coordination benefit clearly exceeds coordination cost) — need at least 3
+of 5 to hold. State which ones hold here:
+
+{{GRAPH_JUSTIFICATION}}
+
+## Stages and model routing
+
+Full scoring work is in [`MODEL-ROUTING.md`](MODEL-ROUTING.md), using the rubric in
+workflow-builder's `references/scoring-rubric.md`.
+
+{{STAGE_TABLE}}
+
+## Orchestration (what to actually run)
+
+{{ORCHESTRATION_DIAGRAM}}
+
+**Write-back is the orchestrator's job for any subagent type without `Write`.** Check each
+spawned `subagent_type`'s toolset before assuming it can produce its own output file — many
+read-only agent types (search/explore/review agents) cannot write. For those, the
+orchestrating session takes the `Agent` call's returned text and writes it verbatim to the
+named path itself, before the next stage reads it.
+
+{{OUTPUT_PATHS}}
+
+Each stage's prompt must:
+1. State its one question.
+2. Name its output file path.
+3. Require citations — no uncited claims.
+{{ESCALATION_PROMPT_REQUIREMENT}}
+
+**Gating is honest, not independent-checker gating.** Unless a stage explicitly says
+otherwise, "whoever reads the output file" is the same orchestrating session that spawned
+the stage — there is no separate checker agent for ordinary stages. That's an accepted
+tradeoff for most workflows; only R1 below is a genuinely independent second pass.
+
+## State
+
+- [`TASKS.md`](TASKS.md) — the feature-list triples. Update `state` only when the named
+  verification actually passes — the agent doing the work does not get to mark its own row
+  `passing`; whoever reads its output file does.
+- [`PROGRESS.md`](PROGRESS.md) — append one line per stage completed, with what was decided
+  and why. This is what survives a context reset; reasoning does not survive unless it's
+  written here.
+
+## Review loop for this workflow design itself
+
+This file set is treated as final only once R1 in `TASKS.md` is `passing` — see
+`PROGRESS.md` for the review log. R1 is a manual step, not part of the pipeline above: spawn
+one independent agent (any model — this is a design review, not part of the scored
+pipeline) with no prior context on this draft, and have it review against
+workflow-builder's `references/review-checklist.md`. Re-run it whenever this
+file is materially edited later (new stage added, routing table changed) — it does not
+re-trigger automatically.

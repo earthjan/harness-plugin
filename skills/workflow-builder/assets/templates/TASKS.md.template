@@ -1,0 +1,23 @@
+# Tasks — Feature-List Triples
+
+Each row: behavior + executable/checkable verification + state. An agent doing the work may
+not flip its own row to `passing` — the row flips only when whoever reads the output file
+confirms the verification holds (pass-state gating).
+
+States: `not_started` / `active` / `blocked` / `passing`.
+
+| # | Behavior | Output file | Verification | State |
+|---|---|---|---|---|
+{{STAGE_ROWS}}
+
+<!-- Give every verification criterion an executable or grep-able floor check alongside its
+prose judgment, where one exists — e.g. `grep -c '^UNRESOLVED:' <file>` for an escalation
+marker, `grep -oE 'https?://...' <file> | wc -l` for a citation-count floor. Prose-only
+criteria are acceptable when the output genuinely can't be mechanically checked, but reach
+for a mechanical floor check first. -->
+
+## Workflow self-review (separate from the pipeline above)
+
+| # | Behavior | Output | Verification | State |
+|---|---|---|---|---|
+| R1 | Independent review of this file set against workflow-builder's `references/review-checklist.md` | logged in `PROGRESS.md` | Reviewer names concrete findings or explicitly signs off with none; findings are either applied or explicitly deferred with a reason | not_started |

@@ -1,0 +1,34 @@
+# Model Routing — Scoring Worked Out
+
+Topic doc for [`CONTEXT.md`](CONTEXT.md). Read
+workflow-builder's `references/scoring-rubric.md` for the dimension
+definitions and score→model thresholds this file applies — don't restate them here, just
+show the work.
+
+## Stage scores
+
+{{PER_STAGE_SCORING}}
+
+<!-- One block per stage, in this shape:
+
+### Stage N — <name>
+<Dimension 1> <score> (<one-clause reason>) · <Dimension 2> <score> (<reason>) · ... for
+all six dimensions.
+**Total <n> → `<model>`.** <Name the specific trigger if this hit an escalation condition;
+otherwise state which threshold band it landed in.>
+-->
+
+## Escalation rules (if any)
+
+{{ESCALATION_RULES}}
+
+<!-- For a conditional escalation (a stage that might re-run at a higher model based on its
+own output), state: what marker the orchestrator greps for, what it means, and what happens
+to the stage's output file when the escalation fires (overwritten in place? merged?). A
+branch without a mechanically detectable trigger isn't a real branch — it's a hope. -->
+
+## Re-scoring
+
+If a stage's prompt changes scope materially after this was written, re-score that row here
+before re-running it. Don't let the model choice drift from what actually got asked of the
+agent.

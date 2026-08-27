@@ -1,0 +1,6 @@
+# Progress Log
+
+One line per completed stage/review: what happened, what was decided, why. This is what
+survives a context reset — the reasoning, not just the file.
+
+- {{DATE}} — Workflow drafted (`CONTEXT.md`, `MODEL-ROUTING.md`, `TASKS.md`). {{DRAFT_SUMMARY}}
