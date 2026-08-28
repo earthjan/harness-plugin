@@ -73,14 +73,19 @@ decided automatically instead of adding another thing the user has to answer per
 Write `docs/tickets/<id>/SPEC.md`. Its job is different from `ship-ui`'s own `PLAN.md`, and it's
 worth keeping that boundary clean rather than duplicating effort:
 
-- **`SPEC.md` (this skill) answers:** what's being built, why, and — once Phase 4/5 resolve them —
-  the critical decisions with the actual choice that was made, not just the question that was
-  asked.
-- **`PLAN.md` (ship-ui's own Phase 1, later) answers:** acceptance criteria, files to touch,
-  implementation order — derived *from* this spec, once it's unambiguous.
+- **`SPEC.md` (this skill) answers:** what's being built, why, the critical decisions with the
+  actual choice that was made (once Phase 4/5 resolve them), and — as of Phase 3.6 — the
+  ticket-level **Acceptance Criteria**: the numbered, Gherkin checklist that decides whether the
+  ticket is delivered.
+- **`PLAN.md` (ship-ui's own Phase 1, later) answers:** files to touch, implementation order, and
+  any finer-grained implementation-level criteria (e.g. a wireframe's element-by-element inventory)
+  — derived *from* this spec's Acceptance Criteria, once they exist, not re-derived from scratch.
 
-Don't reach into acceptance-criteria or file-list territory here; that's the next skill's job, and
-it does it better once the ambiguity is already gone.
+Don't reach into file-list or implementation-order territory here; that's the next skill's job, and
+it does it better once the ambiguity is already gone. Acceptance criteria are the one exception —
+this skill owns the ticket-level checklist because it's downstream of the same critical-decision
+resolution this skill already does; ship-ui/ship-non-ui refine it to implementation grain, they
+don't originate it.
 
 ## Phase 3 — Classify what's actually critical
 
@@ -137,13 +142,81 @@ one decision, output dir = `docs/tickets/<id>/RESEARCH/<slug>/`), the same escal
 already uses for a rippling resolution. Most items resolve with the single check; this is the
 exception, not the default.
 
+## Phase 3.6 — Draft acceptance criteria
+
+Besides the critical items Phase 3 surfaces, `SPEC.md` needs one more thing before it's ready to
+present: the hard checklist that decides whether the ticket is actually delivered. This is a
+narrower job than Phase 3 — it doesn't re-read the spec for judgment calls, it just pulls out
+what's already there in checkable form — so run it as its own bounded loop rather than folding it
+into the classification pass.
+
+Each criterion must be:
+
+- **Specific** — a pass/fail check, not a matter of taste. "The feature works well" fails this test;
+  "when the user submits the form with an empty required field, the field shows its error message
+  and the form does not submit" passes it.
+- **Numbered**, so anything downstream (a PR description, a reviewer, a QA plan) can reference it by
+  ID — `AC-01`, `AC-02`, zero-padded two digits, sequential.
+- **Written as Gherkin** — Given/When/Then — so what's required to consider the ticket done reads
+  clearly without translation:
+
+  ```
+  ### AC-01: <short, specific title>
+  - **Given** <the starting state/context>
+  - **When** <the action or event>
+  - **Then** <the specific, observable outcome>
+  ```
+
+**Two agents, maker/checker, bounded 6:** `spec-ac-writer` drafts the list, `spec-ac-reviewer`
+checks it for coverage, format, and specificity — same collect/settle shape as Phase 3, and the same
+"implementer iterates until the reviewer is satisfied" loop `ship-ui`'s own QA-plan phase uses,
+capped lower here (6, not 10) because a criteria list is a narrower, better-defined artifact than a
+full test plan. Loop artifacts live under `docs/tickets/<id>/REVIEWS/ac/iteration-NN/`:
+
+```
+ITERATION = 0
+LOOP:
+  ITERATION += 1
+  mkdir -p REVIEWS/ac/iteration-$(printf %02d "$ITERATION")
+
+  1. Spawn spec-ac-writer — iteration 1: fresh draft from SPEC.md; iteration > 1: hand it its own
+     prior draft plus this iteration's review feedback → write to
+     REVIEWS/ac/iteration-NN/draft.md
+  2. Spawn spec-ac-reviewer on that draft → write to REVIEWS/ac/iteration-NN/review.md
+  3. If verdict == approved → promote draft.md into SPEC.md's own `## Acceptance Criteria`
+     section, exit loop
+  4. If ITERATION == 6 and verdict != approved → promote the current draft.md anyway, append the
+     reviewer's unresolved findings as a "Known Gaps" note at the top of that section, exit loop
+```
+
+```
+Agent({subagent_type: "harness-plugin:spec-ac-writer", description: "Draft the Acceptance Criteria section of SPEC.md — numbered, Gherkin-format, one entry per independently-checkable behavior."})
+
+Agent({subagent_type: "harness-plugin:spec-ac-reviewer", description: "Review the Acceptance Criteria draft at REVIEWS/ac/iteration-NN/draft.md for coverage, Gherkin format, and specificity."})
+```
+
+**A criterion can't outrun an unresolved decision.** If a behavior genuinely depends on a critical
+item that's still open, the writer doesn't guess at one of the options — it writes the criterion as
+far as it honestly goes and marks the outcome `**Then** PENDING-DECISION: <the critical item's
+number/title>`, the same discipline as Phase 3.5's `UNVERIFIED:` marker. When that item is later
+resolved in Phase 5, resolving it also clears its `PENDING-DECISION` markers — see Phase 5.
+
+**Model routing (ticket-effort principle):** `spec-ac-writer` pins `model: sonnet` and
+`spec-ac-reviewer` pins `model: haiku` in their own agent frontmatter — translating spec prose into
+concrete, falsifiable Gherkin takes real interpretation, auditing that result against an explicit
+format/coverage checklist doesn't. Escalate `spec-ac-reviewer` to `model: "sonnet"` per-invocation
+only when this ticket's requirements are genuinely high-stakes or ambiguous; never past `sonnet` for
+either agent.
+
 ## Phase 4 — Present, once
 
 Show the user `SPEC.md` with the classification applied, as one document, read once — not a
 question-by-question interrogation. Lead with a short count (how many critical items, how many
-presentation-only), then critical items first, presentation-only after. By this point every
-option's factual claims are either checked (Phase 3.5) or explicitly still open — nothing reaches
-you framed as settled that was never actually confirmed.
+presentation-only), then critical items first, presentation-only after, then the Acceptance Criteria
+checklist from Phase 3.6. By this point every option's factual claims are either checked (Phase 3.5)
+or explicitly still open — nothing reaches you framed as settled that was never actually confirmed.
+Any `PENDING-DECISION` line in the checklist should read as a visible consequence of the critical
+item it cites, not a separate mystery — point back to that item's number when you present it.
 
 **Every critical item must be genuinely readable without outside context.** That's not a style
 preference here — it's load-bearing, because the whole point of surfacing something as critical is
@@ -171,8 +244,15 @@ re-classify; only fall back to a full `research-workflow` re-run if the ripple i
 open-ended, not just because a resolution touched more than one line (same escalation shape as
 Phase 3.5).
 
-Finished when nothing critical remains unresolved and the user says so. At that point `SPEC.md` is
-what gets handed to `ship-ui`/`ship-non-ui` — point it at the file; there's nothing else to wire up.
+Resolving a critical item also settles any Acceptance Criteria line that was marked
+`PENDING-DECISION` against it. Re-run the Phase 3.6 loop (same bounded-6, same `REVIEWS/ac/iteration-
+NN` convention) scoped to just the affected lines — hand the writer the resolution and the specific
+`AC-NN` lines it unblocks, not the whole checklist. A resolution that touches no `PENDING-DECISION`
+line needs no re-run.
+
+Finished when nothing critical remains unresolved, no Acceptance Criteria line is still marked
+`PENDING-DECISION`, and the user says so. At that point `SPEC.md` is what gets handed to
+`ship-ui`/`ship-non-ui` — point it at the file; there's nothing else to wire up.
 
 ## File layout
 
@@ -186,6 +266,8 @@ docs/tickets/<id>/
   REVIEWS/
     iteration-NN/severity-classifier.md
     FINDINGS.md
+    ac/iteration-NN/draft.md      # Phase 3.6 (and its Phase 5 re-runs) — AC writer/reviewer loop
+    ac/iteration-NN/review.md
 ```
 
 ## A note on where this runs
