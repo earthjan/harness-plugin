@@ -208,13 +208,91 @@ format/coverage checklist doesn't. Escalate `spec-ac-reviewer` to `model: "sonne
 only when this ticket's requirements are genuinely high-stakes or ambiguous; never past `sonnet` for
 either agent.
 
+## Phase 3.7 — Rule on the list with the codebase open
+
+Everything up to here read documents. Phase 3 reads `SPEC.md` and the project's docs with no code
+access; Phase 3.5 only chases claims Phase 3 already wrote down. And the heavy path's own codebase
+mapping, when it ran at all, ran in Phase 1 — *before* `SPEC.md` existed, scoped to finding an
+analog to build from, not to finding what the spec would later contradict.
+
+So nothing yet has looked at the finished spec with the code open. That gap produces two failures at
+once, and they pull in opposite directions:
+
+- **Items flagged critical that the codebase already settles.** "Which of these two implementations
+  is live," "does the working branch need this yet" — real questions with one real answer, costing
+  the user a decision when what they needed was a lookup.
+- **Decisions the spec made that nobody flagged.** A spec is complete sentences, and you can't write
+  a complete sentence without settling things nobody researched. Those choices land on the page
+  looking identical to the researched ones, and a doc-only reader cannot tell them apart.
+
+Run this **after** Phase 3.6, not before: the acceptance-criteria draft is free signal. A criterion
+the writer couldn't make falsifiable, or a `PENDING-DECISION` it had to invent, usually sits right
+on top of a decision the spec took for granted.
+
+**Three steps. The skill orchestrates; neither agent explores on its own.**
+
+```
+mkdir -p REVIEWS/tech-lead/iteration-NN        # NN starts at 01, increments per re-run
+
+1. Spawn spec-tech-lead-scout with SPEC.md, REVIEWS/FINDINGS.md, and this project's arch +
+   product docs for the repo the ticket touches → REVIEWS/tech-lead/iteration-NN/questions.md
+   It outputs questions, never verdicts, capped at 6. Zero is a valid answer — skip to Phase 4
+   if it returns none.
+
+2. For each question, spawn one scoped Explore agent against the real repo — the same cited-
+   lookup shape research-workflow's Stage 2 uses. One question per agent; they don't depend on
+   each other, so spawn them concurrently.
+   → RESEARCH/tech-lead-<slug>.md, one per question, each claim cited file:line
+
+3. Spawn spec-tech-lead-judge with SPEC.md, FINDINGS.md, questions.md, every recon answer, and
+   the resolved path to this skill's own references/severity-classification.md — an added item
+   is held to the same bar as the original list, so it needs the bar itself, not a paraphrase
+   → REVIEWS/tech-lead/iteration-NN/verdict.md, then fold into FINDINGS.md
+```
+
+```
+Agent({subagent_type: "harness-plugin:spec-tech-lead-scout", description: "Name the codebase questions that must be answered before ruling on this ticket's critical-decision list."})
+
+Agent({subagent_type: "harness-plugin:spec-tech-lead-judge", description: "Rule keep/cut/merge/add on the critical-decision list, with the recon answers in hand."})
+```
+
+The split is deliberate. Hand one agent both jobs and it forms verdicts while still scouting, then
+asks the questions that confirm them — reintroducing exactly the ruling-before-the-facts failure
+Phase 3.5 exists to prevent. The scout also ships without `Grep` on purpose: it must ask for
+searches rather than run them, which is what keeps its input small and its judgment sharp.
+
+**Folding the verdict into `FINDINGS.md`:**
+
+- **Cut** — strike the item, and write its settled fact into `SPEC.md` where it belongs. A cut item
+  never just disappears; its answer becomes part of the spec. Keep the struck item visible in
+  `FINDINGS.md` with the reason, the same way an earlier iteration's correction stays legible.
+- **Merge** — fold into the surviving item as a sub-option; don't silently drop either write-up.
+- **Add** — insert as a new numbered critical item. Then, if it blocks any acceptance criterion,
+  mark that line `PENDING-DECISION: <the item>` and re-run the Phase 3.6 loop scoped to just those
+  lines — same bounded-6, same `REVIEWS/ac/iteration-NN` convention Phase 5 already uses.
+- **Keep** — no change, but record that it was checked and why it survived. That's what stops the
+  next session re-asking the same thing.
+
+**This phase is deletable, and you should be ready to delete it.** Track, over about five tickets:
+items cut, items added, and how many adds the user resolved as genuinely load-bearing rather than
+waving through. If nothing is ever cut and the adds never change what gets built, remove the phase
+— that's a real answer about the classifier being good enough, and cheaper than carrying a step
+that does nothing. Two failure signs worth naming early: verdicts that cite docs but never files
+mean the recon isn't working and you've paid for a second severity classifier; adds every ticket
+with cuts never means the brief has tilted into an amplifier.
+
 ## Phase 4 — Present, once
 
 Show the user `SPEC.md` with the classification applied, as one document, read once — not a
 question-by-question interrogation. Lead with a short count (how many critical items, how many
-presentation-only), then critical items first, presentation-only after, then the Acceptance Criteria
-checklist from Phase 3.6. By this point every option's factual claims are either checked (Phase 3.5)
-or explicitly still open — nothing reaches you framed as settled that was never actually confirmed.
+presentation-only, and what Phase 3.7 cut or added), then critical items first, presentation-only
+after, then the Acceptance Criteria checklist from Phase 3.6. By this point every option's factual
+claims are either checked (Phase 3.5) or explicitly still open — nothing reaches you framed as
+settled that was never actually confirmed.
+
+**Zero critical items is a real answer.** On a mechanical ticket it's the right one. Say so plainly
+and go straight to the Acceptance Criteria — never manufacture an item to fill the section, and
+never re-frame a fact Phase 3.7 settled as though it were still open.
 Any `PENDING-DECISION` line in the checklist should read as a visible consequence of the critical
 item it cites, not a separate mystery — point back to that item's number when you present it.
 
@@ -263,11 +341,14 @@ docs/tickets/<id>/
   RESEARCH/              # heavy path (Phase 1) and per-claim (Phase 3.5) output
     verify-<slug>.md      # Phase 3.5 — single-claim fact-checks
     <slug>/                # Phase 3.5 escalation — full research-workflow scoped to one decision
+    tech-lead-<slug>.md   # Phase 3.7 — one cited recon answer per scout question
   REVIEWS/
     iteration-NN/severity-classifier.md
     FINDINGS.md
     ac/iteration-NN/draft.md      # Phase 3.6 (and its Phase 5 re-runs) — AC writer/reviewer loop
     ac/iteration-NN/review.md
+    tech-lead/iteration-NN/questions.md   # Phase 3.7 — scout output
+    tech-lead/iteration-NN/verdict.md     # Phase 3.7 — judge output
 ```
 
 ## A note on where this runs

@@ -72,6 +72,21 @@ merge anything that doesn't survive that question. A short, high-signal list tha
 truly needs a decision does more for the user than an exhaustive catalog of everything that was
 technically ambiguous.
 
+**A lookup is not a decision.** If you can picture the person reading this answering it in a few
+seconds from what they already know — what's on which branch, what the existing code does, which of
+two implementations is live — it isn't a judgment call. It's a fact somebody needs to go get, and it
+belongs in `SPEC.md` as a stated fact, not on this list as an open question. Phrasing something as
+"we need to decide X" doesn't make it a decision when there's only one real answer and the work is
+just finding it.
+
+**Returning zero critical items is a valid outcome, and on a straightforward ticket it's the
+expected one.** Nothing in this brief asks you to find something. A mechanical change, a bugfix whose
+shape is already settled, a ticket the docs cover outright — those should come back with an empty
+critical list and nothing padding it. Left unsaid, a reviewer asked to classify will always classify
+*something*, and an item surfaced only because the list looked too short costs the user real
+attention on a decision they never needed to make. If nothing clears the bar, say so plainly and
+return none.
+
 ## Write-up format — every critical item, no exceptions
 
 A severity tag on its own isn't a flag the user can act on; it's a flag they'd have to go translate
